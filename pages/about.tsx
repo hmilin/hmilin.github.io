@@ -1,4 +1,5 @@
 import type { NextPage } from "next";
+import Layout from "../components/Layout";
 import styles from "../styles/about.module.css";
 import { AboutData } from "./api/about";
 
@@ -15,7 +16,7 @@ export async function getStaticProps() {
 
 const About: NextPage<{ data: AboutData }> = ({ data }) => {
   return (
-    <div>
+    <Layout>
       <div>
         <img src={data.cover} alt="cover" />
       </div>
@@ -34,7 +35,7 @@ const About: NextPage<{ data: AboutData }> = ({ data }) => {
           </a>
         ))}
       </div>
-    </div>
+    </Layout>
   );
 };
 
