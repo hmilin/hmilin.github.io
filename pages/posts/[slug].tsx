@@ -10,23 +10,19 @@ import path from "path";
 import { postFilePaths, POSTS_PATH } from "../../utils/mdxUtils";
 import Code from "../../components/Code";
 
+import styles from '../../styles/post.module.css';
 
 const components = {
   Head,
-  code: Code
+  code: Code,
 };
 
 const PostsPage: NextPage = ({ source, frontMatter }) => {
   return (
-    <Layout>
-      <div className="post-header">
-        <h1>{frontMatter.title}</h1>
-        {frontMatter.description && (
-          <p className="description">{frontMatter.description}</p>
-        )}
-        <p>{frontMatter.date}</p>
+    <Layout title={frontMatter.title} description={frontMatter.description}>
+      <div className={styles.postContainer}>
+        <MDXRemote {...source} components={components} />
       </div>
-      <MDXRemote {...source} components={components} />
     </Layout>
   );
 };

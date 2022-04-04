@@ -16,11 +16,26 @@ module.exports = {
           marginTop: "3em",
           marginBottom: "3em",
         },
-        h1: { fontSize: theme("fontSize.2xl") },
-        h2: { fontSize: theme("fontSize.xl") },
-        h3: { fontSize: theme("fontSize.lg") },
-        h4: { fontSize: theme("fontSize.base") },
-        h5: { fontSize: theme("fontSize.sm") },
+        h1: {
+          fontSize: theme("fontSize.2xl"),
+          fontWeight: theme("fontWeight.bold"),
+        },
+        h2: {
+          fontSize: theme("fontSize.xl"),
+          fontWeight: theme("fontWeight.semibold"),
+        },
+        h3: {
+          fontSize: theme("fontSize.lg"),
+          fontWeight: theme("fontWeight.medium"),
+        },
+        h4: {
+          fontSize: theme("fontSize.base"),
+          fontWeight: theme("fontWeight.medium"),
+        },
+        h5: {
+          fontSize: theme("fontSize.sm"),
+          fontWeight: theme("fontWeight.medium"),
+        },
         "h1, h2, h3, h4, h5": {
           marginBottom: "0.6em",
         },
@@ -36,23 +51,12 @@ module.exports = {
           position: "relative",
           paddingLeft: "1.75em",
         },
-        "ul > li::before": {
-          content: '""',
-          width: "0.75em",
-          height: "0.125em",
-          position: "absolute",
-          top: "calc(0.875em - 0.0625em)",
-          left: 0,
-          borderRadius: "999px",
-          backgroundColor: theme("colors.slate.300"),
-        },
         a: {
           fontWeight: theme("fontWeight.semibold"),
-          textDecoration: "none",
-          borderBottom: `1px solid ${theme("colors.sky.300")}`,
+          color: theme("colors.indigo.600"),
         },
         "a:hover": {
-          borderBottomWidth: "2px",
+          color: theme("colors.indigo.400"),
         },
         "a code": {
           color: "inherit",
@@ -65,11 +69,13 @@ module.exports = {
         pre: {
           color: theme("colors.slate.50"),
           borderRadius: theme("borderRadius.lg"),
-          padding: theme("padding.2"),
           boxShadow: theme("boxShadow.md"),
           display: "flex",
           marginTop: `${20 / 14}em`,
           marginBottom: `${32 / 14}em`,
+        },
+        "pre code": {
+          borderRadius: theme("borderRadius.lg"),
         },
         "p + pre": {
           marginTop: `${-4 / 14}em`,

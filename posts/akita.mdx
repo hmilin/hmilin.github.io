@@ -1,0 +1,181 @@
+---
+title: Akita
+description: 如何使用Akita作为Angular的状态管理库
+date: 2022-4-2
+---
+
+
+# Angular状态管理-Akita
+
+Akita 是一种状态管理模式，建立在 RxJS 之上，它采用了 Flux 的多个数据存储的思想和 Redux 的不可变更新的思想，以及流数据的概念，创建了 Observable Data Stores 模型。
+
+Akita 鼓励简单。它为您省去了创建样板代码的麻烦，并提供了具有中等学习曲线的强大工具，适合有经验和没有经验的开发人员。
+
+与 Angular 解耦，可以和其他框架一起使用。
+
+## 流程图
+
+[hello](http://meiling.fun)
+
+## 基本概念
+
+#### store
+
+Store 包含 store 状态并作为唯一的真实来源。
+
+##### 利用 Akita 的 Store 创建一个 store 对象
+
+```
+import { Store, StoreConfig } from '@datorama/akita';
+
+export interface SessionState {
+   token: string;
+   name: string;
+}
+
+export function createInitialState(): SessionState {
+  return {
+    token: '',
+    name: ''
+  };
+}
+
+@StoreConfig({ name: 'session' })
+export class SessionStore extends Store<SessionState> {
+  constructor() {
+    super(createInitialState());
+  }
+}
+```
+
+##### 使用 update 方法更新状态
+
+```
+import { SessionStore } from './session.store';
+
+export class SessionService {
+  constructor(private sessionStore: SessionStore) {}
+
+  updateUserName(newName: string) {
+    this.sessionStore.update({ name: newName });
+  }
+}
+```
+
+##### setLoading 方法设置 loading 状态
+
+```
+import { SessionStore } from './session.store';
+
+export class SessionService {
+  constructor(private sessionStore: SessionStore,
+              private http: HttpClient) {}
+
+  async updateUserName(newName: string) {
+    this.sessionStore.setLoading(true);
+    await this.http(...).toPromise();
+    this.sessionStore.update({ name: newName});
+    this.sessionStore.setLoading(false);
+  }
+}
+```
+
+##### setError 方法抛出错误
+
+```
+import { SessionStore } from './session.store';
+
+export class SessionService {
+  constructor(private sessionStore: SessionStore,
+              private http: HttpClient) {}
+
+  async updateUserName(newName: string) {
+    try {
+      await this.http(...).toPromise();
+    } catch(error) {
+      this.sessionStore.setError(error);
+    }
+  }
+}
+```
+
+##### 使用 destroy 方法销毁 store
+
+```
+sessionStore.destroy();
+```
+
+#### Query
+
+Query 提供查询store的功能，通过 constructor 来接收自己的 store 和其他 query
+
+##### 创建Query
+
+```
+import { Query } from '@datorama/akita';
+import { SessionState, SessionStore } from './session.store';
+
+export class SessionQuery extends Query<SessionState> {  
+  constructor(protected store: SessionStore) {
+    super(store);
+  }
+}
+```
+
+##### 使用select方法获取observable类型的state值
+
+```
+
+import { Query } from '@datorama/akita';
+import { SessionState } from './session.store';
+
+export class SessionQuery extends Query<SessionState> {
+  allState$ = this.select();
+  isLoggedIn$ = this.select(state => !!state.token);
+  selectName$ = this.select('name');
+
+  // Returns { name, age }
+  multiProps$ = this.select(['name', 'age']);
+
+  // Returns [name, age]
+  multiPropsCallback$ = this.select(
+    [state => state.name, state => state.age]
+  )
+  
+  constructor(protected store: SessionStore) {
+    super(store);
+  }
+}
+```
+
+##### 使用getValue方法获取当前state值
+
+```
+
+import { Query } from '@datorama/akita';
+import { SessionState } from './session.store';
+
+export class SessionQuery extends Query<SessionState> {
+
+  constructor(protected store: SessionStore) {
+    super(store);
+  }
+
+  get isLoggedIn() {
+    return !!this.getValue().token;
+  }
+}
+```
+
+##### selectLoading 和 selectError 可以获取loading和error，返回Observable类型
+
+```
+
+@Component({})
+export class LoginComponent {
+  isLoading$ = this.sessionQuery.selectLoading();
+	 error$ = this.sessionQuery.selectError();
+
+  constructor(private sessionQuery: SessionQuery) {}
+}
+```
