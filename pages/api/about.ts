@@ -26,7 +26,7 @@ export default function handler(
       {
         name: "github",
         url: "https://github.com/hmilin",
-        cover: "github.svg",
+        cover: "/github.svg",
       },
     ],
   });

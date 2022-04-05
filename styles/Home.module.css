@@ -1,5 +1,5 @@
 .postContainer {
-  width: 800px;
+  width: 768px;
   margin: 0 auto;
   padding: 48px 0;
 }
@@ -15,12 +15,12 @@
 }
 
 .card :first-child {
-  width: 300px;
+  flex: 1 0 0;
   overflow: hidden;
 }
 
 .card :nth-child(2) {
-  flex: 1 1 0;
+  flex: 2 1 0;
 }
 
 .card img {
@@ -42,4 +42,21 @@
 
 .card p {
   color: theme(colors.slate.500);
+}
+
+@media (max-width: 768px) {
+  .postContainer {
+    width: auto;
+    padding: 48px 24px;
+  }
+}
+
+@media (max-width: 576px) {
+  .card {
+    flex-direction: column;
+    height: 400px;
+  }
+  .card :nth-child(2) {
+    flex: 1 1 0;
+  }
 }

@@ -25,6 +25,13 @@
   color: theme(colors.slate.50);
 }
 
-.header a:hover {
+.header a:hover,
+.header a:active {
   color: theme(colors.amber.400);
+}
+
+@media (max-width: 768px) {
+  .header {
+    padding: 0 24px;
+  }
 }

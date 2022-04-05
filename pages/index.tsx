@@ -10,7 +10,7 @@ import { postFilePaths, POSTS_PATH } from "../utils/mdxUtils";
 interface HomeProps {
   posts: {
     title: string;
-    descriptions: string;
+    description: string;
     date: string;
     cover?: string;
     path: string;
@@ -20,7 +20,7 @@ interface HomeProps {
 const Home: NextPage<HomeProps> = ({ posts }) => {
   return (
     <Layout>
-      <div className={styles.postContainer}>
+      <div id="posts" className={styles.postContainer}>
         {posts.map((post) => (
           <Link key={post.title} href={`posts/${post.path}`}>
             <a className={styles.card}>
@@ -29,7 +29,7 @@ const Home: NextPage<HomeProps> = ({ posts }) => {
               </div>
               <div>
                 <h3>{post.title}</h3>
-                <p>{post.descriptions}</p>
+                <p>{post.description}</p>
               </div>
             </a>
           </Link>

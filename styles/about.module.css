@@ -1,0 +1,22 @@
+.avatar {
+  display: inline-block;
+  border-radius: 100%;
+  width: 100px;
+  height: 100%;
+  overflow: hidden;
+}
+
+.avatar img {
+  width: 100%;
+  height: auto;
+}
+
+.aboutContainer {
+  padding: 48px;
+  text-align: center;
+}
+
+.contacts a img {
+  width: 20px;
+  height: 20px;
+}

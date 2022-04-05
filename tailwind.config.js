@@ -73,6 +73,7 @@ module.exports = {
           display: "flex",
           marginTop: `${20 / 14}em`,
           marginBottom: `${32 / 14}em`,
+          overflow: "auto"
         },
         "pre code": {
           borderRadius: theme("borderRadius.lg"),

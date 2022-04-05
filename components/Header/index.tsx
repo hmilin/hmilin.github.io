@@ -18,13 +18,10 @@ const Header: NextPage<{}> = () => {
       <nav>
         <ul>
           <li>
-            <Link href="/">文章</Link>
+            <Link href="/#posts">文章</Link>
           </li>
           <li>
             <Link href="/about">关于</Link>
-          </li>
-          <li>
-            {/* <Link href="">github</Link> */}
           </li>
         </ul>
       </nav>

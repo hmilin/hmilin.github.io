@@ -10,8 +10,6 @@ import path from "path";
 import { postFilePaths, POSTS_PATH } from "../../utils/mdxUtils";
 import Code from "../../components/Code";
 
-import styles from '../../styles/post.module.css';
-
 const components = {
   Head,
   code: Code,
@@ -20,7 +18,7 @@ const components = {
 const PostsPage: NextPage = ({ source, frontMatter }) => {
   return (
     <Layout title={frontMatter.title} description={frontMatter.description}>
-      <div className={styles.postContainer}>
+      <div className="content-container">
         <MDXRemote {...source} components={components} />
       </div>
     </Layout>

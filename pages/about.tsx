@@ -1,7 +1,9 @@
 import type { NextPage } from "next";
 import Layout from "../components/Layout";
-import styles from "../styles/about.module.css";
 import { AboutData } from "./api/about";
+import classNames from "classnames";
+
+import styles from "../styles/about.module.css";
 
 export async function getStaticProps() {
   const res = await fetch("http://localhost:3000/api/about");
@@ -17,23 +19,25 @@ export async function getStaticProps() {
 const About: NextPage<{ data: AboutData }> = ({ data }) => {
   return (
     <Layout>
-      <div>
-        <img src={data.cover} alt="cover" />
-      </div>
-      <div>
-        <img src={data.avatar} alt="avatar" />
-        <h4>{data.name}</h4>
+      <div className={classNames("content-container", styles.aboutContainer)}>
+        <div className={styles.avatar}>
+          <img src={data.avatar} alt="avatar" />
+        </div>
+        <h2>{data.name}</h2>
         <p>{data.introduce}</p>
-        {data.icons.map((icon) => (
-          <a
-            key={icon.name}
-            href={icon.url}
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            <img src={icon.cover} alt={icon.name} />
-          </a>
-        ))}
+        <div className={styles.contacts}>
+          {data.icons.map((icon) => (
+            <a
+              key={icon.name}
+              href={icon.url}
+              rel="noopener noreferrer"
+              target="_blank"
+              className="inline-block"
+            >
+              <img src={icon.cover} alt={icon.name} />
+            </a>
+          ))}
+        </div>
       </div>
     </Layout>
   );
