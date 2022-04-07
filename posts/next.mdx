@@ -1,0 +1,471 @@
+---
+title: Next.js 基本使用
+date: 2021-09-09 20:23:00
+description: Next.js 从搭建到部署
+---
+
+# Next.js 基本使用
+
+next.js 是基于React的前端框架，主要用于支持静态渲染或服务端渲染。
+
+### 背景
+
+#### SPA 💆
+
+single-page application，即单页面应用，是一种网络应用程序或网站的模型，它通过动态重写当前页面来与用户交互，避免了页面之间切换打断用户体验。所有必要的代码（`HTML`、`JavaScript`和`CSS`）都通过单个页面的加载而检索，或者根据需要（通常是为响应用户操作）动态装载适当的资源并添加到页面，页面在任何时间点都不会重新加载，也不会将控制转移到其他页面。
+
+##### 优缺点
+
+优点：
+
+- 用户体验好，页面切换速度快
+
+- 良好的前后端分离，分工明确
+
+缺点：
+
+- 不利于SEO
+
+- 首屏渲染速度较慢
+
+#### CSR 和 SSR
+
+CSR：Client Side Render，即客户端渲染，服务端只返回一个html模板，页面的内容通过运行js运行。Angular、React和Vue构建的应用，默认都是客户端渲染。
+
+SSR：Server Side Render，即服务端渲染。页面上的内容通过服务端渲染生成，然后再将完整的html返回给浏览器。
+
+
+
+### 快速开始
+
+#### 创建项目
+
+使用`create-next-app`创建新的 Next.js 应用程序
+
+```bash
+npx create-next-app --typescript
+# or
+yarn create next-app --typescript
+```
+
+#### 基本特性
+
+##### 页面
+
+在 Next.js 中，一个 **page（页面）** 就是一个从 `.js`、`jsx`、`.ts` 或 `.tsx` 文件导出（export）的 [React 组件](https://reactjs.org/docs/components-and-props.html) ，这些文件存放在 `pages` 目录下。每个 page（页面）都使用其文件名作为路由（route）。
+
+##### 路由
+
+​	文件目录 → 路由
+
+- `pages/index.js`  → `/`
+- `pages/blog/index.js` → `/blog`
+- `pages/blog.js`→ `/blog`
+- `pages/blog/[id].js`→ `/blog/:id`
+- `pages/[username]/settings.js` → `/:username/settings`
+- `pages/post/[...all].js` → `/post/*` (`/post/2020/id/title`)
+
+通过useRouter获取动态参数，如下：
+
+```tsx
+const router = useRouter();
+const { all } = router.query;
+```
+
+路由跳转有两种方式，通过Link组件或者useRouter
+
+```tsx
+import Link from 'next/link'
+
+const Post: NextPage = () => {
+    ...
+    return (
+        <div>
+            <p>{Array.isArray(all) ? all.join('/') : all}</p>
+            <Link href="/blog/123"><a>blog</a></Link>
+        </div>
+    );
+}
+
+```
+
+##### 获取数据
+
+1. getStaticProps
+
+使用getStaticProps方法，next.js会在执行`next-build`的时候预渲染页面，并将getStaticProps的返回作为props传给组件。也就是说，在执行完build之后，数据就变成静态的数据了。
+
+```tsx
+export async function getStaticProps(context) {
+    const res = await fetch(`https://service-go08i9b4-1301241041.gz.apigw.tencentcs.com/products`);
+    const products = await res.json();
+
+    if (!products) {
+        return {
+            notFound: true,
+        }
+    }
+
+    return {
+        props: { products: products as Products }, // will be passed to the page component as props
+    }
+}
+```
+
+2. getServerSideProps
+
+使用getServerSideProps方法，next.js会在每一次请求的时候将返回结果作为props传给组件。使用getServerSideProps来获取数据，虽然剧有实时性，但是响应速度将比getStaticProps慢，因为每一次都需要请求新的数据然后计算结果，并且不能在没有额外的配置下被CDN缓存。
+
+```js
+function Page({ data }) {
+  // Render data...
+}
+
+// This gets called on every request
+export async function getServerSideProps() {
+  // Fetch data from external API
+  const res = await fetch(`https://.../data`)
+  const data = await res.json()
+
+  // Pass data to the page via props
+  return { props: { data } }
+}
+
+export default Page
+```
+
+##### CSS支持
+
+1. 全局样式
+
+   在`pages/_app.tsx`中导入css文件，同样支持从`node_modules`目录导入。
+
+   ```tsx
+   import '../styles/globals.css'
+   import 'bootstrap/dist/css/bootstrap.css'
+   ```
+
+   
+
+2. 组件样式
+
+   Next.js 通过 `[name].module.css` 文件命名约定来支持 [CSS 模块](https://github.com/css-modules/css-modules) 。
+
+   例如，假设 `components/` 目录下有一个可重用 `Button` 组件：
+
+   首先，创建 `components/Button.module.css` 文件并填入以下内容：
+
+   ```css
+   .error {
+     color: white;
+     background-color: red;
+   }
+   ```
+
+   然后，创建 `components/Button.js` 文件，导入（import）并使用上述 CSS 文件：
+
+   ```js
+   import styles from './Button.module.css'
+   
+   export function Button() {
+     return (
+       <button
+         type="button"
+         // Note how the "error" class is accessed as a property on the imported
+         // `styles` object.
+         className={styles.error}
+       >
+         Destroy
+       </button>
+     )
+   }
+   ```
+
+    另外，Next.js允许导入（import）具有 `.scss` 和 `.sass` 扩展名的 Sass 文件，只要确保安装了sass，即可使用。
+
+##### 常用组件
+
+1. `next/image`
+
+   Next.js 的 Image 组件（即 [`next/image`](https://www.nextjs.cn/docs/api-reference/next/image)）是对 HTML 的 `<img>` 元素的扩展，跟进了最新的 web 技术。
+
+   自动图片优化功能（Automatic Image Optimization）能够调整图片尺寸、优化图片并以最新的 [WebP](https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Image_types) 格式传输图片（如果浏览器支持 WebP 格式的话）。这样就可以避免将较大的图片传送到视口（viewport）较小的设备上。此功能还允许 Next.js 自动采用未来的图片格式，并将其传输给支持这些格式的浏览器。
+
+   自动图片优化功能可以支持任何图片来源。即使是托管在外部数据源上（例如，CMS），仍可对图片进行优化。
+
+   Next.js 无需在构建时优化图片，而是根据用户的请求按需优化图片。与静态站点生成器和纯静态解决方案不同，无论发布 10 张还是 1000 万张图片，构建时间都不会增加。
+
+   图片默认是延迟加载的。这意味着你的页面不会因为加载视口（viewport）外的图片而影响页面的加载速度。当图片进入视口（viewport）时才加载。
+
+   始终以这种方式渲染图片是为了避免 [累计布局偏移（Cumulative Layout Shift）](https://web.dev/cls/)，此 [Core Web Vital](https://web.dev/vitals/) 被 Google 作为参数用于 [搜索排名](https://webmasters.googleblog.com/2020/05/evaluating-page-experience.html)。
+
+   使用：
+
+   ```jsx
+   import Image from 'next/image'
+   
+   function Home() {
+     return (
+       <>
+         <h1>My Homepage</h1>
+         <Image
+           src="/me.png"
+           alt="Picture of the author"
+           width={500}
+           height={500}
+         />
+         <p>Welcome to my homepage!</p>
+       </>
+     )
+   }
+   
+   export default Home
+   ```
+
+2. `next/head`
+
+   用于将 HTML 标签添加到页面的 `head` 中
+
+   ```js
+   import Head from 'next/head'
+   
+   function IndexPage() {
+     return (
+       <div>
+         <Head>
+           <title>My page title</title>
+           <meta name="viewport" content="initial-scale=1.0, width=device-width" />
+         </Head>
+         <p>Hello world!</p>
+       </div>
+     )
+   }
+   
+   export default IndexPage
+   ```
+
+#### 配置
+
+##### 简介
+
+对于 Next.js 的自定义高级行为，可以在项目目录的根目录（package.json 旁边）创建一个 next.config.js。
+
+`next.config.js`是一个Node.js模块，不是一个json文件。
+
+定义如下：
+
+```js
+module.exports = {
+  /* config options here */
+}
+```
+
+也可以使用一个函数：
+
+```js
+module.exports = (phase, { defaultConfig }) => {
+  return {
+    /* config options here */
+  }
+}
+```
+
+通过config的类型大概可以知道它支持哪些配置：
+
+```typescript
+export declare type NextConfig = {
+    [key: string]: any;
+} & {
+    i18n?: I18NConfig | null;
+    eslint?: ESLintConfig;
+    typescript?: TypeScriptConfig;
+    headers?: () => Promise<Header[]>;
+    rewrites?: () => Promise<Rewrite[] | {
+        beforeFiles: Rewrite[];
+        afterFiles: Rewrite[];
+        fallback: Rewrite[];
+    }>;
+    redirects?: () => Promise<Redirect[]>;
+    webpack5?: false;
+    excludeDefaultMomentLocales?: boolean;
+    webpack?: ((config: any, context: {
+        dir: string;
+        dev: boolean;
+        isServer: boolean;
+        buildId: string;
+        config: NextConfigComplete;
+        defaultLoaders: {
+            babel: any;
+        };
+        totalPages: number;
+        webpack: any;
+    }) => any) | null;
+    trailingSlash?: boolean;
+    env?: {
+        [key: string]: string;
+    };
+    distDir?: string;
+    cleanDistDir?: boolean;
+    assetPrefix?: string;
+    useFileSystemPublicRoutes?: boolean;
+    generateBuildId?: () => string | null | Promise<string | null>;
+    generateEtags?: boolean;
+    pageExtensions?: string[];
+    compress?: boolean;
+    poweredByHeader?: boolean;
+    images?: ImageConfig;
+    devIndicators?: {
+        buildActivity?: boolean;
+    };
+    onDemandEntries?: {
+        maxInactiveAge?: number;
+        pagesBufferLength?: number;
+    };
+    amp?: {
+        canonicalBase?: string;
+    };
+    basePath?: string;
+    sassOptions?: {
+        [key: string]: any;
+    };
+    productionBrowserSourceMaps?: boolean;
+    optimizeFonts?: boolean;
+    reactStrictMode?: boolean;
+    publicRuntimeConfig?: {
+        [key: string]: any;
+    };
+    serverRuntimeConfig?: {
+        [key: string]: any;
+    };
+    httpAgentOptions?: {
+        keepAlive?: boolean;
+    };
+    future?: {
+        /**
+         * @deprecated this options was moved to the top level
+         */
+        webpack5?: false;
+        strictPostcssConfiguration?: boolean;
+    };
+    experimental?: {
+        swcMinify?: boolean;
+        swcLoader?: boolean;
+        cpus?: number;
+        sharedPool?: boolean;
+        plugins?: boolean;
+        profiling?: boolean;
+        isrFlushToDisk?: boolean;
+        reactMode?: 'legacy' | 'concurrent' | 'blocking';
+        workerThreads?: boolean;
+        pageEnv?: boolean;
+        optimizeImages?: boolean;
+        optimizeCss?: boolean;
+        scrollRestoration?: boolean;
+        stats?: boolean;
+        externalDir?: boolean;
+        conformance?: boolean;
+        amp?: {
+            optimizer?: any;
+            validator?: string;
+            skipValidation?: boolean;
+        };
+        reactRoot?: boolean;
+        disableOptimizedLoading?: boolean;
+        gzipSize?: boolean;
+        craCompat?: boolean;
+        esmExternals?: boolean | 'loose';
+        staticPageGenerationTimeout?: number;
+        isrMemoryCacheSize?: number;
+        nftTracing?: boolean;
+        concurrentFeatures?: boolean;
+    };
+};
+```
+
+
+
+#### 部署
+
+next的部署主要有三种方式
+
+##### Vercel
+
+Vercel (之前也叫 Zeit 或 now.sh) 是一家提供静态网站托管的云平台，支持从 Github, GitLab, Bitbucket 等代码仓库中自动拉取代码 然后进行项目打包和部署等功能。但是国内访问速度较慢，在此不多做介绍。
+
+##### Node.js服务
+
+Next.js 可以部署到任何支持 Node.js 的托管提供商处。
+
+确保你的 `package.json` 文件中设置了 `"build"` 和 `"start"` 脚本：
+
+```json
+{
+  "scripts": {
+    "dev": "next",
+    "build": "next build",
+    "start": "next start"
+  }
+}
+```
+
+##### Docker Image
+
+打成镜像，可以部署到docker容器里，也可以部署到容器编排器里（kubernetes或者HashiCorp Nomad）。
+
+Dockerfile文件参考：
+
+```dockerfile
+# Install dependencies only when needed
+FROM node:alpine AS deps
+# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
+
+# Rebuild the source code only when needed
+FROM node:alpine AS builder
+WORKDIR /app
+COPY . .
+COPY --from=deps /app/node_modules ./node_modules
+RUN yarn build && yarn install --production --ignore-scripts --prefer-offline
+
+# Production image, copy all the files and run next
+FROM node:alpine AS runner
+WORKDIR /app
+
+ENV NODE_ENV production
+
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nextjs -u 1001
+
+# You only need to copy next.config.js if you are NOT using the default configuration
+# COPY --from=builder /app/next.config.js ./
+COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+
+USER nextjs
+
+EXPOSE 3000
+
+# Next.js collects completely anonymous telemetry data about general usage.
+# Learn more here: https://nextjs.org/telemetry
+# Uncomment the following line in case you want to disable telemetry.
+# ENV NEXT_TELEMETRY_DISABLED 1
+
+CMD ["yarn", "start"]
+```
+
+##### 导出静态文件
+
+执行`next build` 和 `next export`
+
+符合以下任何一项，将不允许使用静态导出：
+
+- 使用`getStaticPaths`的`fallback: true`模式
+- 使用了`next/Image`组件，并且使用默认
+- 使用了`getServerSideProps`来获取数据
+- 使用国际化路由
+- 使用API路由

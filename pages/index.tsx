@@ -47,9 +47,11 @@ export const getStaticProps = async () => {
     .map((filePath) => {
       const source = fs.readFileSync(path.join(POSTS_PATH, filePath));
 
-      const { data } = matter(source);
+      const { data:{date, ...data} } = matter(source);
+			console.log('data', data)
       return { ...data, path: filePath.replace(/\.mdx?$/, "") };
-    });
+    })
+		// .filter((data) => data.public !== false);
 
   return {
     props: {

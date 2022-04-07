@@ -1,0 +1,39 @@
+---
+title: 生成文件下载功能
+date: 2021-02-21 15:32:00
+description: 前端实现点击生成文件并下载。
+---
+
+利用 a 标签 download 属性和 href 属性
+
+```
+element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text))
+```
+
+具体实现代码为
+
+```
+onDownload() {
+    const ele = this.renderer.createElement('a');
+    this.renderer.setAttribute(ele, 'href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(this.logSearch1.log));
+    this.renderer.setAttribute(ele, 'download', 'log.txt');
+    document.body.appendChild(ele);
+    ele.click();
+    document.body.removeChild(ele);
+}
+```
+
+以上实现方式当遇到文本量多的时候会失效，因为href属性受浏览器对url长度的限制，超过限制长度会失效，可以使用blob对象，使用如下
+```
+onDownload() {
+    const ele = this.renderer.createElement('a');
+    // 修改部分
+    const blob = new Blob([this.logSearch1.log], {type: 'text/plain'});
+    this.renderer.setAttribute(ele, 'href', URL.createObjectURL(blob));
+    // 修改部分end
+    this.renderer.setAttribute(ele, 'download', 'log.txt');
+    document.body.appendChild(ele);
+    ele.click();
+    document.body.removeChild(ele);
+}
+```

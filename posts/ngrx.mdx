@@ -1,0 +1,97 @@
+---
+title: Angular状态管理-Ngrx
+date: 2021-07-02 19:31:00
+description: Angular状态管理-Ngrx的工作流和基础概念解释。
+---
+
+
+# Angular状态管理-Ngrx
+
+## 官网介绍
+
+- Managing global and local state.
+- Isolation of side effects to promote a cleaner component architecture.
+- Entity collection management.
+- Integration with the Angular Router.
+- Developer tooling that enhances developer experience when building many different types of applications.
+
+## 流程图
+
+![NGRX数据流向](/posts-img/ngrx-state-management-lifecycle.png)
+
+## 基本概念
+
+#### actions
+
+代表一个应用中唯一发生的事件
+
+```
+interface Action {
+	type: string;  // [Source] description
+}
+// 举个栗子
+{
+	type: '[Auth API] Login Success'
+}
+{
+  type: '[Login Page] Login',
+  username: string;
+  password: string;
+}
+```
+
+actions 用法
+
+定义
+
+```
+import { createAction, props } from '@ngrx/store';
+
+export const login = createAction(
+  '[Login Page] Login',
+  props<{ username: string; password: string }>()
+);
+```
+
+调用
+
+```
+onSubmit(username: string, password: string) {
+  store.dispatch(login({ username: username, password: password }));
+}
+```
+
+#### reducers
+
+根据 action 的类型通过一个纯函数来更新 state
+
+用法
+
+```
+const scoreboardReducer = createReducer(
+  initialState,
+  on(ScoreboardPageActions.homeScore, state => ({ ...state, home: state.home + 1 })),
+  on(ScoreboardPageActions.awayScore, state => ({ ...state, away: state.away + 1 })),
+  on(ScoreboardPageActions.resetScore, state => ({ home: 0, away: 0 })),
+  on(ScoreboardPageActions.setScores, (state, { game }) => ({ home: game.home, away: game.away }))
+);
+
+export function reducer(state: State | undefined, action: Action) {
+  return scoreboardReducer(state, action);
+}
+```
+
+#### selectors
+
+selectors 是用来获取当前状态的一个纯函数
+ngrx 提供了 createSelector 和 createFeatureSelector 来创建 selector
+
+## 工作流
+
+1. 定义 state
+2. 编写 aciton，定义一个数据可以有哪些操作
+3. 编写 reducer，使用 createReducer 方法，定义哪些 action 的触发需要对 state 做哪些修改，on 的第二个参数必须为纯函数
+4. 在 module 文件里的 StoreModule.forRoot 方法传入新定义的 state 与之对应的 reducer
+5. 利用 selector 来获取当前 state
+6. 利用 dispatch 方法触发 action
+

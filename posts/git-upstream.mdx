@@ -1,0 +1,28 @@
+---
+title: Fork的仓库与原仓库保持一致
+date: 2021-7-30 20:40:00
+description: Fork的仓库与原仓库保持一致
+---
+
+# Fork的仓库与原仓库保持一致
+
+1. 使用 git remote -v 查看远程仓库路径，如果只有origin，说明还没设置upstream
+
+
+2. 设置upstream
+
+```
+git remote add upstream <url>
+```
+
+3. 获取原仓库的更新
+
+```
+git fetch upstream
+```
+
+4. 合并远程的master分支
+
+```
+git merge upstream/master
+```

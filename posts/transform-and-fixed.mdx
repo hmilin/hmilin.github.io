@@ -1,0 +1,27 @@
+---
+title: transform属性对fixed定位子元素的影响🥶
+date: 2021-09-06 12:00:00
+description: transform属性设置对fixed子元素参考对象的影响
+---
+
+# transform属性对fixed定位子元素的影响🥶
+
+今天碰到一个问题，在一个可移动的元素A里面，有一个设置了固定定位的子元素B，当A移动之后，B不再相对于viewport定位，而是相对A定位了。元素移动的原理是给元素加上transform属性来产生偏移，所以很容易知道是transform属性对B产生了影响。于是通过翻阅 <a href="https://www.w3.org/TR/css-transforms-1/#transform-property" target="_blank">W3c文档的transform属性</a>发现transform属性会改变fixed定位的参考对象。
+
+### transform改变position:fixed的参考对象
+
+`transform`属性值导致元素成为一个包含块，而其固定定位的后代元素都是以此该父元素作为他们的包含块。因此，当父元素设置了transform属性，子元素的fixed定位都将以该父元素作为参考对象。
+
+### transform属性产生的其他影响
+
+##### 提升元素垂直地位
+
+当元素因为margin负值重叠时，后面的元素会覆盖前面的元素，在前面的元素上加上transform属性的话，前面的元素会覆盖后面的元素。
+
+##### 改变overflow对absolute元素的限制
+
+绝对定位元素B的父元素A设置了overflow为非visible，不会对B起作用，但是如果父元素加上transform属性，B就会受A的overflow属性影响了。
+
+##### 限制absolute的100%宽度大小
+
+当给absolute属性元素设置宽度100%时，会往上找到第一个非static定位的元素（没有的话就是viewport）计算，但是如果某个父元素设置了transform属性，将会基于这个元素来作为参考，和对fixed的影响其实是一样的。

@@ -1,0 +1,33 @@
+---
+title: 解决node-sass安装失败问题
+date: 2021-04-20 20:09:00
+description: node-sass 安装失败的原因和解决办法，现代sass已经不需要了？
+---
+
+#### 安装失败原因
+
+- ##### 使用了国外镜像源，网络不通
+
+    删除yarn.lock或者pack-lock.json，然后设置全局镜像源为淘宝镜像源，再重新执行 yarn 或 npm install 即可
+
+- ##### node-sass版本和node版本不匹配
+
+    到[node-sass的npm首页](https://www.npmjs.com/package/node-sass)查看版本对应
+
+    {% asset_img node-sass-version.png %}
+
+- ##### binding.node下载失败
+
+    node-sass会下载二进制文件binding.node，默认源是github，需要修改变量sass_binary_site
+    
+    ```
+        // npm
+        npm config set sass_binary_site https://npm.taobao.org/mirrors/node-sass/
+        // yarn
+        yarn config set sass_binary_site https://npm.taobao.org/mirrors/node-sass/
+    ```
+    或者直接修改.npmrc 或者 .yarnrc
+    
+- ##### 提示网络环境没有python
+  
+    这一步通常是binding.node下载失败，开始执行本地构建导致的，目标应该放在解决binding.node安装问题

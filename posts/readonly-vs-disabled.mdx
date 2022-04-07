@@ -1,0 +1,23 @@
+---
+title: 表单控件disabled属性和readonly属性的区别
+date: 2021-11-17 20:53:00
+description: 表单控件disabled属性和readonly属性的区别
+---
+
+# 表单控件disabled属性和readonly属性的区别
+
+
+## Disabled 
+
+- 不会被表单处理器接收和处理
+- 某些浏览器会给disabled属性的元素一些默认样式
+- 不接收click、focus、hover等事件
+- 忽略tabindex属性
+
+## Read Only
+
+- select、option、button没有readonly属性
+- 浏览器不会提供默认样式
+- 能被表单处理器接收和处理
+- 能接收click、focus、hover等事件
+- tabindex可以起作用

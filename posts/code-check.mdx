@@ -1,0 +1,63 @@
+---
+title: ESLint 和 Prettier 的使用
+date: 2021-03-13 20:53:00
+description: ESLint 和 Prettier 的区别和使用方法。
+---
+
+
+### ESLint 和 Prettier 的区别
+
+ESLint解决代码质量和代码格式问题
+
+Prettier解决代码格式问题
+
+> Linters usually contain not only code quality rules, but also stylistic rules. Most stylistic rules are unnecessary when using Prettier, but worse – they might conflict with Prettier!
+
+### Prettier使用
+1. 安装
+
+```
+yarn add --dev --exact prettier
+
+```
+
+
+2. 配置.prettierrc.json和.prettierignore文件，根据使用框架参考对应开源项目
+
+
+3. 编辑器安装prettier插件并配置使用方式
+
+3. Git整合，确保代码提交的时候使用了格式化
+
+整合方式有4种
+- lint-staged，
+- pretty-quick
+- pre-commit
+- precise-commits
+
+使用lint-staged
+
+```
+npx mrm lint-staged
+```
+
+
+
+
+### ESLint使用
+
+### 两者一起使用
+
+代码格式问题由Prettier接管，但是报错来源依旧是ESLint
+```
+// .eslintrc    
+{      
+    "plugins": ["prettier"],      
+    "rules": {        
+        "prettier/prettier": "error"      
+    }    
+}
+```
+
+
+引用：https://ordina-jworks.github.io/angular/2018/10/08/angular-state-management-comparison.html

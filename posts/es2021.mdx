@@ -1,0 +1,110 @@
+---
+title: ES2021更新内容
+date: 2021-07-9 20:53:00
+description: ES2021更新内容概览。
+---
+
+## ES2021 功能
+
+- 新增三个逻辑运算符
+
+- 数字分隔符
+
+- Promise.any & AggregateError
+
+- String.prototype.replaceAll
+
+- WeakRefs & FinalizationRegistry Objects
+
+### 三个逻辑运算符
+
+```
+//"Or Or Equals"
+x ||= y;
+x || (x = y);
+
+// "And And Equals"
+x &&= y;
+x && (x = y);
+
+// "QQ Equals"
+x ??= y;
+x ?? (x = y);
+```
+
+### 数字分隔符
+
+支持数字组直接的视觉分离
+
+```
+1_000_000_000           // Ah, so a billion
+101_475_938.38          // And this is hundreds of millions
+
+let fee = 123_00;       // $123 (12300 cents, apparently)
+let fee = 12_300;       // $12,300 (woah, that fee!)
+let amount = 12345_00;  // 12,345 (1234500 cents, apparently)
+let amount = 123_4500;  // 123.45 (4-fixed financial)
+let amount = 1_234_500; // 1,234,500
+```
+
+```
+0.000_001 // 1 millionth
+1e10_000  // 10^10000 -- granted, far less useful / in-range...
+0xA0_B0_C0;
+```
+
+### Promise.any & AggregateError
+
+```
+Promise.any([
+  fetch('https://v8.dev/').then(() => 'home'),
+  fetch('https://v8.dev/blog').then(() => 'blog'),
+  fetch('https://v8.dev/docs').then(() => 'docs')
+]).then((first) => {
+  // 只要有一个状态为fulfilled就执行
+  console.log(first);
+  // → 'home'
+}).catch((error) => {
+  // 所有promises状态为rejected时执行
+  console.log(error);
+});
+```
+
+### String.prototype.replaceAll
+
+```
+// String.prototype.replaceAll(searchValue, replaceValue)
+
+'x'.replace('', '_');
+// → '_x'
+
+'xxx'.replace(/(?:)/g, '_');
+// → '_x_x_x_'
+
+'xxx'.replaceAll('', '_');
+// → '_x_x_x_'
+```
+
+### WeakRefs & FinalizationRegistry Objects
+
+WeakRef  的一个实例创建了一个对给定对象的引用，如果该对象仍然在内存中，则返回该对象；如果目标对象已经被垃圾回收，则返回未定义的对象。
+
+FinalizationRegistry 的实例在注册的目标对象被垃圾收集后触发回调函数。
+
+```
+let target = {};
+let wr = new WeakRef(target);
+// wr === target  false
+
+// Creating a new registry
+const registry = new FinalizationRegistry(heldValue => {
+  // ....
+});
+
+registry.register(myObject, "some value", myObject);
+// ...some time later, if you don't care about `myObject` anymore...
+registry.unregister(myObject);
+```
+
+
+

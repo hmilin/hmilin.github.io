@@ -1,0 +1,171 @@
+---
+title: TypeScript 装饰器使用
+date: 2021-09-24 19:00:00
+description: TypeScript 装饰器使用
+---
+
+# TypeScript 装饰器使用
+
+> 装饰器模式，又名装饰者模式。它的定义是“在不改变原对象的基础上，通过对其进行包装拓展，使原有对象可以满足用户的更复杂需求”。
+
+根据装饰对象分类常见的装饰器有三种，类装饰器、属性装饰器和函数装饰器。
+
+## 使用装饰器工厂生成装饰器
+
+定义一个装饰器工厂格式大概如下：
+
+其实就是定义一个函数，该函数返回一个另一个函数，对装饰对象进行处理之后将结果返回。
+
+```
+function name () {
+    return function(target: IConfirmableDirective, propertyKey: string, descriptor: PropertyDescriptor) {
+            // TODO 对装饰对象的处理，并返回处理结果
+    }
+}
+```
+
+第一层函数可以传入装饰器参数
+
+```
+function name(value: string) {
+    return function() {}
+}
+// 即是这么使用
+@name('111') ...
+```
+
+第二层函数的参数即是装饰对象的源数据
+
+- target:  装饰类的构造函数
+- propertyKey: 属性的key值
+- descriptor: 装饰对象的PropertyDescriptor
+
+## 装饰器使用示例
+
+删除操作二次确认是日常开发中很常见的场景，正常的实现思路是点击删除按钮时执行一个函数，这个函数的内容包括打开一个确认框，定义好回调函数，等二次确定后执行回调。大致如下：
+
+```
+delete() {
+   this.noticeService.dialog({
+      title,
+      theme: 'error',
+      body: description,
+      callback: (ret: boolean) => {
+        if (!ret) {
+          return;
+        }
+        // 执行删除函数
+      },
+    });
+}
+```
+
+如果使用装饰器改写，只需要在函数前面加个装饰器，不需要修改函数本身，并且看起来更优雅简洁。调用方式如下：
+
+```
+ @deleteConfirm('删除应用', '确定删除应用？')
+ delete() {
+     // 删除操作 
+ }
+```
+
+装饰器实现代码如下：
+
+```
+interface IConfirmableDirective {
+  injector: Injector;
+  ngOnInit?: Function;
+}
+export default function deleteConfirm(title: string, description: string) {
+  return function (
+    target: IConfirmableDirective,
+    key: string,
+    descriptor: PropertyDescriptor
+  ) {
+    const originalMethod = descriptor.value;
+    const originNgOninit = target.ngOnInit;
+    let noticeService: NoticeService;
+    target.ngOnInit = function (this: IConfirmableDirective) {
+      originNgOninit && originNgOninit.apply(this);
+      noticeService = this.injector.get(NoticeService);
+    };
+    descriptor.value = async function (...args: any[]) {
+      let confirm = new Promise<boolean>((resolve) => {
+        noticeService.dialog({
+          title,
+          theme: 'error',
+          body: description,
+          callback: (ret: boolean) => {
+            if (!ret) {
+              resolve(false);
+              return;
+            }
+            resolve(true);
+          },
+        });
+      });
+      let res = await confirm;
+      if (res) {
+        const result = originalMethod.apply(this, args);
+        return result;
+      }
+    };
+    return descriptor;
+  };
+}
+```
+
+## Ng-Zorro中的装饰器
+
+上面我们简单实现了一个装饰器工厂，但是有很多代码是每次定义装饰器的时候都要重复写的。在Ng-Zorro中，就被提取为一个公共函数，避免了很多重复的代码，并且避免了装饰器命名重复。
+
+```
+function propDecoratorFactory<T, D>(
+  name: string,
+  fallback: (v: T) => D
+): (target: NzSafeAny, propName: string) => void {
+  function propDecorator(
+    target: NzSafeAny,
+    propName: string,
+    originalDescriptor?: TypedPropertyDescriptor<NzSafeAny>
+  ): NzSafeAny {
+    const privatePropName = `$$__zorroPropDecorator__${propName}`;
+    if (Object.prototype.hasOwnProperty.call(target, privatePropName)) {
+      warn(`The prop "${privatePropName}" is already exist, it will be overrided by ${name} decorator.`);
+    }
+    Object.defineProperty(target, privatePropName, {
+      configurable: true,
+      writable: true
+    });
+    return {
+      get(): string {
+        return originalDescriptor && originalDescriptor.get
+          ? originalDescriptor.get.bind(this)()
+          : this[privatePropName];
+      },
+      set(value: T): void {
+        if (originalDescriptor && originalDescriptor.set) {
+          originalDescriptor.set.bind(this)(fallback(value));
+        }
+        this[privatePropName] = fallback(value);
+      }
+    };
+  }
+  return propDecorator;
+}
+```
+
+这样，声明一个装饰器会变得更简洁：
+
+```
+export function InputBoolean(): NzSafeAny {
+  return propDecoratorFactory('InputBoolean', toBoolean);
+}
+```
+
+## 常见的业务场景
+
+- 实现React高阶组件。
+- 对属性进行格式转换，通常格式化数据我们会使用定义函数的方式对数据修改然后返回，也可以尝试使用装饰器，让代码更优雅一些。
+- 对函数执行之前进行拦截，例如上面的删除确认拦截。
+- 对类功能的扩展，在不改变源代码的情况下对功能扩展，使代码更具维护性。

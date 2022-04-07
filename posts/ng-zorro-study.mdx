@@ -1,0 +1,321 @@
+---
+title: Ng-Zorro代码鉴赏
+date: 2021-12-10 13:55:00
+description: Ng-Zorro是ant-design组件库的angular实现，前段时间我们在项目中将组件库换成Zorro，因此看了一下代码实现，总结一些好的写法。
+---
+
+# Ng-Zorro代码鉴赏
+
+Ng-Zorro是ant-design组件库的angular实现，前段时间我们在项目中将组件库换成Zorro，因此看了一下代码实现，总结一些好的写法。
+
+## 目录
+
+```text
+| 文件/文件名称 | 说明 | 
+| components | 组件文件夹，包含框架组件源码 |
+| docs | 非组件文章文档，如国际化、全局配置等 |
+| integration | 构建操作工具，搭配 travis 使用 |
+| schematics | 自定义脚手架，ng g add ng-zorro-antd |
+| scripts | 发布/调试脚本 |
+| CODE_OF_CONDUCT.md | 贡献指南 |
+| CHANGELOG.md | 发布日志 |
+```
+
+其中components/core 放了一些公共代码
+
+关于和ant-design保持样式统一，他们使用了[机器人](https://github.com/ng-zorro-bot)从ant-design同步样式代码。
+
+## ONPUSH变更检测模式的使用
+
+angular中有两种检测模式，一种是CheckAlways，一种是CheckOnce，通过component装饰器的changeDetection字段来定义
+
+```js
+@Component({
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export declare enum ChangeDetectionStrategy {
+    /**
+     * Use the `CheckOnce` strategy, meaning that automatic change detection is deactivated
+     * until reactivated by setting the strategy to `Default` (`CheckAlways`).
+     * Change detection can still be explicitly invoked.
+     * This strategy applies to all child directives and cannot be overridden.
+     */
+    OnPush = 0,
+    /**
+     * Use the default `CheckAlways` strategy, in which change detection is automatic until
+     * explicitly deactivated.
+     */
+    Default = 1
+}
+```
+
+OnPush模式的使用:
+
+由[ChangeDetectorRef](https://angular.cn/api/core/ChangeDetectorRef)提供变更检测功能
+
+```typescript
+abstract class ChangeDetectorRef {
+  abstract markForCheck(): void // 当视图使用 OnPush（checkOnce）变更检测策略时，把该视图显式标记为已更改，以便它再次进行检查。
+  abstract detach(): void // 从变更检测树中分离开视图。 
+  abstract detectChanges(): void // 检查该视图及其子视图。
+  abstract checkNoChanges(): void // 检查变更检测器及其子检测器，如果检测到任何更改，则抛出异常。
+  abstract reattach(): void // 把以前分离开的视图重新附加到变更检测树上。 视图会被默认附加到这棵树上。
+}
+```
+
+使用示例：
+
+zorro中这段代码出现过很多次，作用是当全局配置中对应当前组件的配置修改时，将视图标记为需检测。
+
+```typescript
+this.nzConfigService
+    .getConfigChangeEventForComponent(NZ_CONFIG_COMPONENT_NAME)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe(() => {
+    this.cdr.markForCheck();
+});
+```
+
+表单控件中，当writeVaule执行时（即将变化的数据写入视图时），标记为需检测。
+
+```typescript
+writeValue(value: number): void {
+    this.value = value;
+    this.setValue(value);
+    this.updateDisplayValue(value);
+    this.cdr.markForCheck();
+}
+```
+
+
+
+## 使用[NgZone](https://angular.cn/api/core/NgZone)
+
+Zone 是跨异步任务而持久存在的执行上下文。
+
+ngZone基于zone.js，是Angular变更检测的基础，Angular通过zone监听到了异步任务的执行过程，便于在异步任务执行时触发变更检测。
+
+
+
+使用`ngZone.runOutsideAngular`让代码执行不触发新的变更检测，在调用`run`将这些任务重新进入Angular zone
+
+```typescript
+this.ngZone.runOutsideAngular(() => {
+      fromEvent<MouseEvent>(this.elementRef.nativeElement, 'click')
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(event => {
+          /** prevent label click triggered twice. **/
+          event.stopPropagation();
+          event.preventDefault();
+          if (this.nzDisabled || this.isChecked) {
+            return;
+          }
+          this.ngZone.run(() => {
+            if (this.nzRadioService) {
+              this.nzRadioService.select(this.nzValue);
+            }
+            if (this.isNgModel) {
+              this.isChecked = true;
+              this.onChange(true);
+            }
+            this.cdr.markForCheck();
+          });
+        });
+    });
+```
+
+## 对templateRef传参的处理
+
+Zorro的组件中很多支持`string | TemplateRef<void>`这种类型的传参，用于将字符串或模板植入组件视图。angular有一个[NgTemplateOutlet](https://angular.cn/api/common/NgTemplateOutlet)指令，用于将templateRef插入视图，为了同时处理TemplateRef和string类型，zorro中封装了一个类似的指令`nzStringTemplateOutlet`。
+
+核心代码为
+
+```typescript
+constructor(private viewContainer: ViewContainerRef, private templateRef: TemplateRef<NzSafeAny>) {}
+
+private recreateView(): void {
+    this.viewContainer.clear();
+    const isTemplateRef = this.nzStringTemplateOutlet instanceof TemplateRef;
+    const templateRef = (isTemplateRef ? this.nzStringTemplateOutlet : this.templateRef) as NzSafeAny;
+    this.embeddedViewRef = this.viewContainer.createEmbeddedView(
+    templateRef,
+    isTemplateRef ? this.nzStringTemplateOutletContext : this.context
+    );
+}
+  
+ngOnChanges(changes: SimpleChanges): void {
+    // ...
+     if (recreateView) {
+      /** recreate view when context shape or outlet change **/
+      this.recreateView();
+    } else {
+    // ...
+	}
+}
+```
+
+在很多个组件文件里都能看到他的使用，大概如下:
+
+```typescript
+<ng-container *nzStringTemplateOutlet="nzMessage">{{ nzMessage }}</ng-container>
+@Input() nzMessage: string | TemplateRef<void> | null = null;
+```
+
+指令是Angular中用于封装公共行为的强有力工具，它拥有了对模板的控制权，和组件一样拥有生命周期，但是使用起来更灵活。
+
+## 对装饰器的使用
+
+1. 属性装饰器
+
+   zorro中基本每一个组件都会看到@InputNumber、@InputBoolean这样的装饰器使用，用于对输入参数进行强制类型转换，避免因类型错误影响后面程序运行。
+
+   
+
+   在typescript中声明一个工厂装饰器的思路大致如下：
+
+   ```typescript
+   function name () {
+       return function(target: IConfirmableDirective, propertyKey: string, descriptor: PropertyDescriptor) {
+               // TODO 对装饰对象的处理，并返回新的descriptor
+       }
+   }
+   
+   ```
+	 
+   zorro中定义了一个生产属性装饰器的函数，传入装饰器名称和对属性的处理函数，即可生成一个装饰器。
+
+   ```typescript
+   function propDecoratorFactory<T, D>(
+     name: string,
+     fallback: (v: T) => D
+   ): (target: NzSafeAny, propName: string) => void {
+     function propDecorator(
+       target: NzSafeAny,
+       propName: string,
+       originalDescriptor?: TypedPropertyDescriptor<NzSafeAny>
+     ): NzSafeAny {
+       const privatePropName = `$$__zorroPropDecorator__${propName}`;
+   
+       if (Object.prototype.hasOwnProperty.call(target, privatePropName)) {
+         warn(`The prop "${privatePropName}" is already exist, it will be overrided by ${name} decorator.`);
+       }
+   
+       Object.defineProperty(target, privatePropName, {
+         configurable: true,
+         writable: true
+       });
+   
+       return {
+         get(): string {
+           return originalDescriptor && originalDescriptor.get
+             ? originalDescriptor.get.bind(this)()
+             : this[privatePropName];
+         },
+         set(value: T): void {
+           if (originalDescriptor && originalDescriptor.set) {
+             originalDescriptor.set.bind(this)(fallback(value));
+           }
+           this[privatePropName] = fallback(value);
+         }
+       };
+     }
+   
+     return propDecorator;
+   }
+   
+   export function InputBoolean(): NzSafeAny {
+     return propDecoratorFactory('InputBoolean', toBoolean);
+   }
+   
+   ```
+
+   
+
+2. 从全局配置中获取默认数值的装饰器
+
+   zorro提供了一个`NzConfigService`类，可以通过依赖注入的方式或者调用api的方式来设置组件的默认配置
+
+   ```typescript
+   export function WithConfig<T>() {
+     return function ConfigDecorator(
+       target: NzSafeAny,
+       propName: NzSafeAny,
+       originalDescriptor?: TypedPropertyDescriptor<T>
+     ): NzSafeAny {
+       const privatePropName = `$$__zorroConfigDecorator__${propName}`;
+   
+       Object.defineProperty(target, privatePropName, {
+         configurable: true,
+         writable: true,
+         enumerable: false
+       });
+   
+       return {
+         get(): T | undefined {
+           const originalValue = originalDescriptor?.get ? originalDescriptor.get.bind(this)() : this[privatePropName];
+           const assignedByUser = (this.propertyAssignCounter?.[propName] || 0) > 1;
+           const configValue = this.nzConfigService.getConfigForComponent(this._nzModuleName)?.[propName];
+           if (assignedByUser && isDefined(originalValue)) {
+             return originalValue;
+           } else {
+             return isDefined(configValue) ? configValue : originalValue;
+           }
+         },
+         set(value?: T): void {
+           // If the value is assigned, we consider the newly assigned value as 'assigned by user'.
+           this.propertyAssignCounter = this.propertyAssignCounter || {};
+           this.propertyAssignCounter[propName] = (this.propertyAssignCounter[propName] || 0) + 1;
+   
+           if (originalDescriptor?.set) {
+             originalDescriptor.set.bind(this)(value!);
+           } else {
+             this[privatePropName] = value;
+           }
+         },
+         configurable: true,
+         enumerable: true
+       };
+     };
+   }
+   
+   ```
+
+   在组件中使用如下:
+
+   ```typescript
+   @Input() @WithConfig() nzSize: NzSizeLDSType | number = 'default';
+   
+   ```
+
+   如何保证优先级?
+
+   组件调用>用户配置>默认配置
+
+   ```typescript
+   const assignedByUser = (this.propertyAssignCounter?.[propName] || 0) > 1;
+   
+   ```
+
+   每次调用set的时候会+1，大于1说明用户自己设置了，使用用户设置的值，否则先读配置里，没有的话再读组件里的默认值。
+
+## 使用[angular/cdk/overlay](https://v12.material.angular.io/cdk/overlay/overview)对浮层进行统一管理
+
+为什么需要对浮层进行统一管理？
+
+- 规避父元素样式的影响（比如transition属性的影响）
+- 在创建和销毁弹出层时，避免影响应用主体
+- 方便 z-index 的设置与管理
+
+@angular/cdk的overlay模块提供了一套管理浮层的功能
+
+使用大致如下：
+
+```typescript
+const containerPortal = new ComponentPortal<BaseModalContainerComponent>(
+      ContainerComponent,
+      config.nzViewContainerRef,
+      injector
+    );
+const containerRef = overlayRef.attach<BaseModalContainerComponent>(containerPortal);
+
+```

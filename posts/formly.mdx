@@ -1,0 +1,599 @@
+---
+title: 动态表单库 Formly
+date: 2021-09-22 21:00:00
+description: 介绍在Angular中如何使用Formly让动态表单实现更简洁。
+---
+
+# 动态表单库 Formly
+
+在一些偏中后台的项目中，表单功能是很常见的业务。随着各个框架和组件库对表单的功能扩展，写表单变得越来越简单，功能也越来越丰富。但是在一些复杂的业务场景中，处理复杂表单还是要耗费很多时间，并且很难分离业务逻辑和视图处理的代码。于是有很多动态表单生成库出现了，Angular 的 Formly，React 的 react-hook-form，同时支持 Vue 和 React 的 Formily，都是解决复杂表单的方案。
+
+Formly 就是 Angular 生态中被使用最多的动态表单库，具有很高的可维护性。并且 Formly 是基于 Angular 的响应式表单开发的，只要你掌握了响应式表单的内容，就可以很快上手 Formly。
+
+## Formly 支持功能
+
+- 自动生成表格
+- 支持使用自定义字段类型、验证器、包装器和扩展
+- 支持多种模式（正式模式和 JSON 模式）
+- 支持多个常用组件库
+- 基于 Angular 响应式表单
+
+## Formly 支持的组件库
+
+- Bootstrap
+- Material2
+- Ionic
+- PrimeNG
+- Kendo
+- NativeScript
+- NG-ZORRO
+
+## 快速开始
+
+### 安装
+
+安装 Formly 并指定使用 UI 库 Ng-Zorro
+
+```
+npx ng add @ngx-formly/schematics --ui-theme=ng-zorro-antd
+```
+
+执行上面命令会帮我们安装好 @ngx-formly/core、@ngx-formly/ng-zorro-antd 和 @ngx-formly/schematics，并在 AppModule 中导入，代码如下：
+
+```
+imports: [
+	...
+	ReactiveFormsModule,
+	FormlyModule.forRoot({ extras: { lazyRender: true } }),
+	FormlyNgZorroAntdModule
+]
+```
+
+### 添加`<formly-form>`
+
+`formly-form`有三个参数
+
+- fields：表单字段配置
+- form：指定表单实例用于跟踪表单状态
+- model：表单的数据模型
+
+template 代码如下：
+
+```
+<form [formGroup]="form">
+  <formly-form [form]="form" [fields]="fields" [model]="model"></formly-form>
+  <button nzType="primary" nz-button>保存</button>
+</form>
+```
+
+### 添加配置数据
+
+```
+ 	form = new FormGroup({});
+	model = { email: 'email@gmail.com' };
+	fields: FormlyFieldConfig[] = [
+		{
+			key: 'email',
+			type: 'input',
+			templateOptions: {
+				label: 'Email address',
+				placeholder: 'Enter email',
+				required: true,
+			}
+		}
+	];
+```
+
+然后就可以看到表单生成效果啦
+
+![生成效果](/posts-img/formly-quick-start.png)
+
+### 配置
+
+- 输入参数：
+
+| 名称    | 类型                   | 默认值            | 必填 | 描述                               |
+| ------- | ---------------------- | ----------------- | ---- | ---------------------------------- |
+| form    | FormGroup 或 FormArray | new FormGroup({}) | 否   | 允许跟踪模型值和验证状态的表单实例 |
+| fields  | FormlyFieldConfig[]    |                   | 是   | 字段配置                           |
+| model   | any                    |                   | 是   | 表单的数据模型                     |
+| options | FormlyFormOptions      |                   | 否   | 表单选项                           |
+
+- 输出参数：
+
+| 名称          | 描述             |
+| ------------- | ---------------- |
+| (modelChange) | 字段数据发送变化 |
+
+- fields
+
+fields 主要是传一些跟字段显示和处理逻辑相关的参数，具体可以参考他的类型定义
+
+- options
+
+options 的接口定义如下：
+
+```
+interface FormlyFormOptions {
+    updateInitialValue?: () => void;
+    resetModel?: (model?: any) => void;
+    formState?: any;
+    fieldChanges?: Subject<FormlyValueChangeEvent>;
+    fieldTransform?: (fields: FormlyFieldConfig[], model: any, form: FormGroup | FormArray, options: FormlyFormOptions) => FormlyFieldConfig[];
+    showError?: (field: FieldType) => boolean;
+    parentForm?: FormGroupDirective | null;
+}
+```
+
+`fromState` 是一种用来在字段间通信的机制。
+
+`fieldTransform` 用于在 Formly 处理或验证 fileds 之前转换成新的 fields 配置。
+
+### 验证器
+
+Formly 支持全局声明自定义验证器和错误信息，使用的时候只需传入之前定义的 key 值
+
+```
+export function IpValidator(control: FormControl): ValidationErrors {
+  return /(\d{1,3}\.){3}\d{1,3}/.test(control.value) ? null : { 'ip': true };
+}
+...
+@NgModule({
+  imports: [
+    ...
+    FormlyModule.forRoot({
+      validators: [
+        { name: 'ip', validation: IpValidator },
+      ],
+      validationMessages: [
+        { name: 'ip', message: IpValidatorMessage },
+        { name: 'required', message: 'This field is required' },
+      ],
+    }),
+  ]
+})
+```
+
+使用如下：
+
+```
+{
+  key: 'ip',
+  type: 'input',
+  templateOptions: {
+    label: 'IP Address (using custom validation declared in ngModule)',
+    required: true,
+  },
+  validators: {
+    validation: ['ip'],
+  },
+},
+```
+
+也可以在定义 field 值的时候引入自定义验证器，使用如下：
+
+```
+{
+  key: 'ip',
+  type: 'input',
+  templateOptions: {
+    label: 'IP Address (using custom validation through `validators.validation` property)',
+    required: true,
+  },
+  validators: {
+    validation: [IpValidator],
+  },
+	asyncValidators: {
+    validation: [IpAsyncValidator],
+	}
+},
+```
+
+field 中的 validators 的值也可以是表达式的形势
+
+```
+NAME_OF_VALIDATOR: {
+  expression: FUNCTION
+  message: FUNCTION | STRING
+}
+```
+
+示例如下：
+
+```
+ validators: {
+    ip: {
+      expression: (c) => /(\d{1,3}\.){3}\d{1,3}/.test(c.value),
+      message: (error, field: FormlyFieldConfig) => `"${field.formControl.value}" is not a valid IP Address`,
+    },
+  },
+```
+
+当然也可以是异步的，返回一个 promise 对象即可，示例如下：
+
+```
+ asyncValidators: {
+    ip: {
+      expression: (c) => return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          resolve(/(\d{1,3}\.){3}\d{1,3}/.test(c.value));
+        }, 1000);
+      }),
+      message: (error, field: FormlyFieldConfig) => `"${field.formControl.value}" is not a valid IP Address`,
+    },
+  }
+```
+
+### Formly 表达式
+
+Formly 定义了一种表达式格式，用于动态修改 field 值。主要通过`hideExpression`和`expressionProperties`两个字段来定义。
+
+1. `hideExpression`用于动态显示表单字段
+
+```
+{
+  key: 'iLikeTwix',
+  type: 'checkbox',
+  templateOptions: {
+    label: 'I like twix',
+  },
+  hideExpression: '!model.name',
+	// 也可以传入一个函数
+	hideExpression: (model: any, formState: any, field: FormlyFieldConfig) => {
+    // access to the main model can be through `this.model` or `formState` or `model
+    if (formState.mainModel && formState.mainModel.city) {
+      return formState.mainModel.city !== "123"
+    }
+    return true;
+  },
+}
+```
+
+2. `expressionProperties`用于动态修改 field 中的属性
+
+```
+{
+  key: 'text2',
+  type: 'input',
+  templateOptions: {
+    label: 'Hey!',
+    placeholder: 'This one is disabled if there is no text in the other input',
+  },
+  expressionProperties: {
+    'templateOptions.disabled': '!model.text',
+  },
+	// 也可以传入一个函数
+	expressionProperties: {
+		'templateOptions.disabled': (model: any, formState: any, field: FormlyFieldConfig) => {
+			// access to the main model can be through `this.model` or `formState` or `model
+			return !formState.mainModel.text
+		},
+  }
+},
+```
+
+### 自定义模板
+
+除了使用已支持的 UI 库，也可以自定义组件，步骤如下：
+
+1. 定义一个 component，继承自类`FieldType`
+
+```
+import { Component } from '@angular/core';
+import { FieldType } from '@ngx-formly/core';
+
+@Component({
+ selector: 'formly-field-input',
+ template: `
+   <input type="input" [formControl]="formControl" [formlyAttributes]="field">
+ `,
+})
+export class FormlyFieldInput extends FieldType {}
+```
+
+2. 在 NgModule 装饰器中注册自定义类型
+
+```
+import { FormlyFieldInput } from './formly-field-input';
+
+@NgModule({
+ declarations: [FormlyFieldInput],
+ imports: [
+   ....
+   FormlyModule.forRoot({
+     types: [
+       { name: 'input', component: FormlyFieldInput },
+     ],
+   }),
+ ],
+})
+export class AppModule {}
+```
+
+3. 在 fields 中使用
+
+```
+export class AppComponent {
+ fields: FormlyFieldConfig[] = [
+   {
+     key: 'firstname',
+     type: 'input',
+   },
+ ];
+
+ ...
+}
+```
+
+### 自定义 Wrapper
+
+`wrapper`是用于指定一个 component 来包装字段，使用不同的 template 会预设不同的 warpper，可以使用自定义 warpper 进行覆盖
+
+1. 定义一个继承自类 FieldWrapper 的组件
+
+```
+import { Component, ViewChild, ViewContainerRef } from '@angular/core';
+import { FieldWrapper } from '@ngx-formly/core';
+
+@Component({
+selector: 'formly-wrapper-panel',
+template: `
+ <div class="card">
+   <h3 class="card-header">Its time to party</h3>
+   <h3 class="card-header">{{ to.label }}</h3>
+   <div class="card-body">
+     <ng-container #fieldComponent></ng-container>
+   </div>
+ </div>
+`,
+})
+export class PanelWrapperComponent extends FieldWrapper {
+}
+```
+
+2. 在 NgModule 装饰器中注册
+
+```
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule } from '@angular/forms';
+import { FormlyModule } from '@ngx-formly/core';
+import { FormlyBootstrapModule } from '@ngx-formly/bootstrap';
+
+import { PanelWrapperComponent } from './panel-wrapper.component';
+import { AppComponent } from './app.component';
+
+@NgModule({
+imports: [
+ CommonModule,
+ ReactiveFormsModule,
+ FormlyBootstrapModule,
+ FormlyModule.forRoot({
+   wrappers: [
+     { name: 'panel', component: PanelWrapperComponent },
+   ],
+ }),
+],
+declarations: [
+ AppComponent,
+ PanelWrapperComponent,
+],
+})
+export class AppModule { }
+```
+
+3. 在定义 fields 时使用
+
+```
+fields: FormlyFieldConfig[] = [
+{
+ key: 'address',
+ wrappers: ['panel'],
+ templateOptions: { label: 'Address' },
+ fieldGroup: [{
+   key: 'town',
+   type: 'input',
+   templateOptions: {
+     required: true,
+     type: 'text',
+     label: 'Town',
+   },
+ }],
+},
+];
+```
+
+也可以为特定的组件指定 wrapper
+
+```
+... //Imports
+  @NgModule({
+    imports: [
+      CommonModule,
+      ReactiveFormsModule,
+      FormlyBootstrapModule,
+      FormlyModule.forRoot({
+        types: [
+          {
+            name: 'operator',
+            component: OperatorComponent,
+            wrappers: ['form-field']
+          },
+        ],
+      }),
+    ],
+    declarations: [
+      AppComponent,
+      OperatorComponent
+    ],
+  })
+  export class AppModule { }
+```
+
+### 使用 Formly 实现一个的动态表单
+
+业务需求：实现一个输入表单，需要的输入参数信息由接口提供，输入个数不定，需要的参数有三种类型，分别为 string、volume、domain，string 类型用输入框填入，volume 类型用选择器填，domain 类型需要填入子域名并选择根域名。
+
+1. 接口返回的数据格式
+
+```
+let inputs: BpInputs = [
+      {
+        bpId: '07d46205-1c59-11ec-b603-0242ac130003',
+        description: '请输入cloudname',
+        type: 'string',
+        internal: false,
+        protocol: null,
+        port: 0,
+        required: true,
+        initValue: {},
+        hidden: false,
+        path: '.bp',
+        keyData: 'bp_cloudname',
+        valueData: null,
+        labelData: 'image-497f>cloudname',
+        default: null,
+      },
+      {
+        bpId: '07d46205-1c59-11ec-b603-0242ac130003',
+        description: '80端口服务的子域名',
+        type: 'domain',
+        internal: false,
+        protocol: 'HTTP',
+        port: 80,
+        required: true,
+        initValue: {},
+        hidden: false,
+        path: '.bp',
+        keyData: 'bp_domain80',
+        valueData: null,
+        labelData: 'image-497f>80端口访问域名',
+        default: null,
+      },
+      {
+        bpId: '07d46205-1c59-11ec-b603-0242ac130003',
+        description: '存储路径',
+        type: 'volume',
+        internal: false,
+        protocol: null,
+        port: 0,
+        required: true,
+        initValue: { path: '/var/lib/nginx' },
+        hidden: false,
+        path: '.bp',
+        keyData: 'bp_volume_var_lib_nginx',
+        valueData: null,
+        labelData: 'image-497f>存储路径',
+        default: null,
+      },
+    ];
+```
+
+2. 获取接口数据并定义 fields 值
+
+```
+	form = new FormGroup({});
+	model = {};
+	fields: FormlyFieldConfig[] = [];
+	options: FormlyFormOptions;
+	volumeOptions = [{ label: 'aaa', value: 'aaa' }];
+	domainSuffix = [{ label: 'dev.xxx.cn', value: 'dev.xxx.cn' }];
+
+	constructor(private formlyService: FormlyService) {}
+
+	ngOnInit(): void {
+		this.formlyService.getInputs().subscribe((res) => {
+			this.initFields(res);
+		});
+	}
+
+	initFields(inputs: BpInputs) {
+		this.fields = inputs.map((input): FormlyFieldConfig => {
+			const { keyData: key, labelData, type, hidden, required } = input;
+
+			let field = {
+				key,
+				name: key,
+				hide: hidden,
+				templateOptions: {
+					required,
+					label: labelData,
+				},
+			};
+
+			switch (type) {
+				case 'string': {
+					return { ...field, type: 'input' };
+				}
+				case 'volume': {
+					let { templateOptions, ...oth } = field;
+					return {
+						...oth,
+						type: 'select',
+						templateOptions: {
+							...templateOptions,
+							options: this.volumeOptions,
+						},
+					};
+				}
+				case 'domain':
+					return {
+						fieldGroupClassName: 'domain-group',
+						fieldGroup: [
+							{
+								key: `${key}-prefix`,
+								name: `${key}-prefix`,
+								type: 'input',
+								className: 'flex-2',
+								templateOptions: {
+									required,
+									label: labelData,
+								},
+							},
+							{
+								key: `${key}-suffix`,
+								name: `${key}-suffix`,
+								type: 'select',
+								className: 'flex-1',
+								templateOptions: {
+									required,
+									options: this.domainSuffix,
+								},
+							},
+						],
+					};
+				default:
+					return field;
+			}
+		});
+	}
+
+	submit() {
+		console.log('model', this.model);
+	}
+```
+
+3. 定义使用formly-form组件
+
+```
+<form [formGroup]="form" (ngSubmit)="submit()">
+  <formly-form [form]="form" [fields]="fields" [model]="model"></formly-form>
+  <nz-form-item>
+    <nz-form-control [nzOffset]="8">
+      <button nzType="primary" nz-button>保存</button>
+    </nz-form-control>
+  </nz-form-item>
+</form>
+```
+
+4. 查看显示效果：
+
+![](/posts-img/input-form.png)
+
+### 实现自定义模板
+
+1. 实现一个自定义表单控件
+
+2. 定义 Formly 模板
+
+3. 注册自定义模板

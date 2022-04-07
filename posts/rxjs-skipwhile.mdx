@@ -1,0 +1,17 @@
+---
+title: Rxjs中 skipWhile 和 filter 的区别
+date: 2021-09-01 12:00:00
+description: 介绍Rxjs中 skipWhile 和 filter 的区别
+---
+# Rxjs中 skipWhile 和 filter 的区别
+
+skipWhile 和 filter 都可以用来过滤不符合条件的数据项，也都是传入一个函数作为参数，但是两者有一定的区别。
+
+以下是官方的描述：
+
+- skipWhile：返回一个 Observable， 该 Observable 会跳过由源 Observable 发出的所有满足指定条件的数据项， 但是一旦出现了不满足条件的项，则发出在此之后的所有项。
+- filter：通过只发送源 Observable 的中满足指定 predicate 函数的项来进行过滤。
+
+
+也就是说，skipWhile 一旦出现不满足条件的数据项，以后所有数据项都不会被跳过，filter则没有这种限制。
+

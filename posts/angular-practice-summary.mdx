@@ -1,0 +1,79 @@
+---
+title: 一个Angular遗产项目改造总结（待补充）
+date: 2021-08-09 20:00:00
+description: 对一个 Angular 遗产项目改造的感悟一些些感悟。
+
+---
+
+# 一个 Angular 遗产项目改造总结
+
+对一个 Angular 遗产项目改造的感悟一些些感悟。
+
+### 拒绝 AnyScript
+
+Angular 中强制使用 Typescript，定义好数据类型，不仅可以提高开发体验和减少代码出错概率，还使代码更方便维护。
+
+### 使用 RxJS，合理运用 async 管道
+
+Angular 自动集成了 RxJS 库，自带的 http 库也默认返回 Observable 类型，RxJS 可以让数据的处理过程和走向更清晰。
+
+async 管道可以帮助 Observable 类型的数据在模板中被解析，并且会自动取消订阅，不用担心内存泄漏。
+
+对于一些需要在 component.ts 中 subscribe 的场景，如果数据来源不是来自调用 http 方法，需要在组件销毁时取消订阅，使用 takeUntil 操作符比直接对 subscription 调用 unsubscribe 方法更优雅。
+
+```
+destroy$ = new Subject<void>();
+ngOnInit(): void {
+	this.balabala.pipe(takeUntil(this.destroy$)).subscribe();
+}
+ngOnDestroy(): void {
+	this.destroy$.next();
+	this.destroy$.complete();
+}
+```
+
+### 拒绝模板表单，拥抱响应式表单
+
+
+
+### 合理拆分子模块，添加路由懒加载和预加载策略
+
+### 学会使用路由守卫
+
+### 删减component的职责，尽量将业务代码放进 service 文件
+
+### 选一个合适的数据共享方案
+
+项目原先也有一个简陋的数据共享方案（以前的同事自己写的），相当于一个注入app模块的service，提供简单的方法设置，并且可以获取 value 和 Subject<value> 。
+
+但是这样的方式存在很多缺点：
+
+- 分散的定义state的值，没办法在一个地方找到存在哪些状态，不利于维护
+
+- 不提供类型定义，返回的值全是any，开发体验极其不好并且容易出错
+
+- 不利于监听实时数据变化，Subject对象只能监听到数据的改变而不能获得监听之前已存在的值，如果你确定数据可能在你监听之前就存在了，必须写两份代码，一个是获取当前值，一个是监听Subject...
+
+- 不提供模块划分，也不能生成多个store实例，所有模块的共享状态存在一起的话会很大，不能在该销毁的时候及时销毁掉
+
+经过对 Angular 三个状态管理方案 Ngrx、Ngxs、Akita的调研，最终选择了Akita。
+
+因为他们官网最好看啊不，因为他们Logo实在太可爱了🤪
+
+其实主要有两点：
+
+- 选择Akita 第一是因为模板代码少，对于一个庞大的遗产项目，模板代码当然是越少越好。
+
+- 第二是因为不需要定义action，在Angular里面通常是在service里定义一些数据的业务逻辑处理或通过http获取，可以定义一个service文件来做数据修改操作，完全不需要定义action也很清晰。
+
+### 谨慎使用全局 CSS 封装策略
+
+Angular 提供了三种 CSS 封装策略，通过设置 Component 装饰器的 encapsulation 值来确定使用哪种策略，三种策略分别为：
+
+- ViewEncapsulation.Emulated：使用垫片（shimmed) CSS 来模拟原生行为。
+
+- ViewEncapsulation.None ：使用不带任何封装的全局 CSS。
+
+- ViewEncapsulation.ShadowDom：使用 Shadow DOM v1，封装样式。
+
+使用 ViewEncapsulation.None 来设置组件 css 可能会造成无法预料的样式全局污染。我发现旧项目中大部分用到这个策略只是为了给组件库里的标签设置样式，使用::ng-deep 选择器就可以解决这类需求（虽然::ng-deep在官网显示为被弃用，但目前官方还没有给出替代方案）。
