@@ -10,12 +10,20 @@ import path from "path";
 import { postFilePaths, POSTS_PATH } from "../../utils/mdxUtils";
 import Code from "../../components/Code";
 
+interface PostsPageProps {
+  source: any;
+  frontMatter: {
+    title: string;
+    description: string;
+  };
+}
+
 const components = {
   Head,
   code: Code,
 };
 
-const PostsPage: NextPage = ({ source, frontMatter }) => {
+const PostsPage: NextPage<PostsPageProps> = ({ source, frontMatter }) => {
   return (
     <Layout title={frontMatter.title} description={frontMatter.description}>
       <div className="content-container">

@@ -1,8 +1,12 @@
-import { NextPage } from "next/types";
+import type { NextPage } from "next";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import { ocean } from "react-syntax-highlighter/dist/cjs/styles/hljs";
 
-const Code: NextPage = ({ className, ...props }) => {
+interface CodeProps {
+  className?: string;
+}
+
+const Code: NextPage<CodeProps> = ({ className, ...props }) => {
   const match = /language-(\w+)/.exec(className || "");
   return (
     <SyntaxHighlighter
