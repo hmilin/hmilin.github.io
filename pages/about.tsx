@@ -6,12 +6,21 @@ import classNames from "classnames";
 import styles from "../styles/about.module.css";
 
 export async function getStaticProps() {
-  const res = await fetch("http://localhost:3000/api/about");
-  const data = await res.json();
-
   return {
     props: {
-      data,
+      data: {
+        cover: "bk.jpg",
+        avatar: "avatar.png",
+        name: "美玲",
+        introduce: "前端开发，19届，广东工业大学信息工程专业",
+        icons: [
+          {
+            name: "github",
+            url: "https://github.com/hmilin",
+            cover: "/github.svg",
+          },
+        ],
+      },
     },
   };
 }
