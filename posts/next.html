@@ -1,0 +1,390 @@
+<!DOCTYPE html><html><head><meta charSet="utf-8"/><title>蛋黄派碎冰冰</title><meta name="description" content="蛋黄派碎冰冰的博客"/><link rel="icon" href="/favicon.ico"/><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"/><meta name="next-head-count" content="5"/><link rel="preload" href="/_next/static/css/3a5f4cd9f9646978.css" as="style"/><link rel="stylesheet" href="/_next/static/css/3a5f4cd9f9646978.css" data-n-g=""/><link rel="preload" href="/_next/static/css/4a0c5542377ce400.css" as="style"/><link rel="stylesheet" href="/_next/static/css/4a0c5542377ce400.css" data-n-p=""/><noscript data-n-css=""></noscript><script defer="" nomodule="" src="/_next/static/chunks/polyfills-5cd94c89d3acac5f.js"></script><script src="/_next/static/chunks/webpack-08ceaf99f165f2e5.js" defer=""></script><script src="/_next/static/chunks/framework-5f4595e5518b5600.js" defer=""></script><script src="/_next/static/chunks/main-e267bb9839e5051c.js" defer=""></script><script src="/_next/static/chunks/pages/_app-fe85ddc63867fc19.js" defer=""></script><script src="/_next/static/chunks/347-34557e8e6f4e11a0.js" defer=""></script><script src="/_next/static/chunks/384-64a86c1d997b1133.js" defer=""></script><script src="/_next/static/chunks/pages/posts/%5Bslug%5D-f0dcdd5740dfb8c2.js" defer=""></script><script src="/_next/static/RWNpKI3MrqdkS-sbWptIf/_buildManifest.js" defer=""></script><script src="/_next/static/RWNpKI3MrqdkS-sbWptIf/_ssgManifest.js" defer=""></script><script src="/_next/static/RWNpKI3MrqdkS-sbWptIf/_middlewareManifest.js" defer=""></script></head><body><div id="__next" data-reactroot=""><div class="Layout_container__CSAqU"><header class="Header_header__Z4YN5"><a href="/">蛋黄派碎冰冰</a><nav><ul><li><a href="/#posts">文章</a></li><li><a href="/about">关于</a></li></ul></nav></header><main><div class="Layout_banner__0qsJd"><h1>Next.js 基本使用</h1><p>Next.js 从搭建到部署</p></div><div class="content-container"><h1>Next.js 基本使用</h1>
+<p>next.js 是基于React的前端框架，主要用于支持静态渲染或服务端渲染。</p>
+<h3>背景</h3>
+<h4>SPA 💆</h4>
+<p>single-page application，即单页面应用，是一种网络应用程序或网站的模型，它通过动态重写当前页面来与用户交互，避免了页面之间切换打断用户体验。所有必要的代码（<div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>HTML</span></code></div>、<div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>JavaScript</span></code></div>和<div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>CSS</span></code></div>）都通过单个页面的加载而检索，或者根据需要（通常是为响应用户操作）动态装载适当的资源并添加到页面，页面在任何时间点都不会重新加载，也不会将控制转移到其他页面。</p>
+<h5>优缺点</h5>
+<p>优点：</p>
+<ul>
+<li>
+<p>用户体验好，页面切换速度快</p>
+</li>
+<li>
+<p>良好的前后端分离，分工明确</p>
+</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>
+<p>不利于SEO</p>
+</li>
+<li>
+<p>首屏渲染速度较慢</p>
+</li>
+</ul>
+<h4>CSR 和 SSR</h4>
+<p>CSR：Client Side Render，即客户端渲染，服务端只返回一个html模板，页面的内容通过运行js运行。Angular、React和Vue构建的应用，默认都是客户端渲染。</p>
+<p>SSR：Server Side Render，即服务端渲染。页面上的内容通过服务端渲染生成，然后再将完整的html返回给浏览器。</p>
+<h3>快速开始</h3>
+<h4>创建项目</h4>
+<p>使用<div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>create-next-app</span></code></div>创建新的 Next.js 应用程序</p>
+<pre><div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-bash" style="white-space:pre"><span>npx create-next-app --typescript
+</span><span></span><span style="color:#65737e"># or</span><span>
+</span>yarn create next-app --typescript
+</code></div></pre>
+<h4>基本特性</h4>
+<h5>页面</h5>
+<p>在 Next.js 中，一个 <strong>page（页面）</strong> 就是一个从 <div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>.js</span></code></div>、<div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>jsx</span></code></div>、<div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>.ts</span></code></div> 或 <div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>.tsx</span></code></div> 文件导出（export）的 <a href="https://reactjs.org/docs/components-and-props.html">React 组件</a> ，这些文件存放在 <div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>pages</span></code></div> 目录下。每个 page（页面）都使用其文件名作为路由（route）。</p>
+<h5>路由</h5>
+<p>​	文件目录 → 路由</p>
+<ul>
+<li><div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>pages/index.js</span></code></div>  → <div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>/</span></code></div></li>
+<li><div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>pages/blog/index.js</span></code></div> → <div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>/blog</span></code></div></li>
+<li><div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>pages/blog.js</span></code></div>→ <div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>/blog</span></code></div></li>
+<li><div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>pages/blog/[id].js</span></code></div>→ <div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>/blog/:id</span></code></div></li>
+<li><div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>pages/[username]/settings.js</span></code></div> → <div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>/:username/settings</span></code></div></li>
+<li><div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>pages/post/[...all].js</span></code></div> → <div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>/post</span><span style="color:#65737e">/*</span></code></div> (<div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>/post/</span><span style="color:#d08770">2020</span><span>/id/title</span></code></div>)</li>
+</ul>
+<p>通过useRouter获取动态参数，如下：</p>
+<pre><div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-tsx" style="white-space:pre"><span style="color:#ebcb8b">const router</span><span> = useRouter();
+</span><span></span><span style="color:#ebcb8b">const</span><span> { all } = router.query;
+</span></code></div></pre>
+<p>路由跳转有两种方式，通过Link组件或者useRouter</p>
+<pre><div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-tsx" style="white-space:pre"><span style="color:#b48ead">import</span><span> Link </span><span style="color:#b48ead">from</span><span> </span><span style="color:#a3be8c">&#x27;next/link&#x27;</span><span>
+</span>
+<span></span><span style="color:#b48ead">const</span><span> Post: NextPage = </span><span class="hljs-function">() =&gt;</span><span> {
+</span>    ...
+<span>    </span><span style="color:#b48ead">return</span><span> (
+</span><span>        </span><span class="xml" style="color:#bf616a">&lt;</span><span class="xml" style="color:#bf616a">div</span><span class="xml" style="color:#bf616a">&gt;</span><span class="xml">
+</span><span class="xml">            </span><span class="xml" style="color:#bf616a">&lt;</span><span class="xml" style="color:#bf616a">p</span><span class="xml" style="color:#bf616a">&gt;</span><span class="xml">{Array.isArray(all) ? all.join(&#x27;/&#x27;) : all}</span><span class="xml" style="color:#bf616a">&lt;/</span><span class="xml" style="color:#bf616a">p</span><span class="xml" style="color:#bf616a">&gt;</span><span class="xml">
+</span><span class="xml">            </span><span class="xml" style="color:#bf616a">&lt;</span><span class="xml" style="color:#bf616a">Link</span><span class="xml" style="color:#bf616a"> </span><span class="xml hljs-attr" style="color:#bf616a">href</span><span class="xml" style="color:#bf616a">=</span><span class="xml" style="color:#a3be8c">&quot;/blog/123&quot;</span><span class="xml" style="color:#bf616a">&gt;</span><span class="xml" style="color:#bf616a">&lt;</span><span class="xml" style="color:#bf616a">a</span><span class="xml" style="color:#bf616a">&gt;</span><span class="xml">blog</span><span class="xml" style="color:#bf616a">&lt;/</span><span class="xml" style="color:#bf616a">a</span><span class="xml" style="color:#bf616a">&gt;</span><span class="xml" style="color:#bf616a">&lt;/</span><span class="xml" style="color:#bf616a">Link</span><span class="xml" style="color:#bf616a">&gt;</span><span class="xml">
+</span><span class="xml">        </span><span class="xml" style="color:#bf616a">&lt;/</span><span class="xml" style="color:#bf616a">div</span><span class="xml" style="color:#bf616a">&gt;</span><span>
+</span>    );
+<!-- -->}
+<!-- -->
+</code></div></pre>
+<h5>获取数据</h5>
+<ol>
+<li>getStaticProps</li>
+</ol>
+<p>使用getStaticProps方法，next.js会在执行<div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>next-build</span></code></div>的时候预渲染页面，并将getStaticProps的返回作为props传给组件。也就是说，在执行完build之后，数据就变成静态的数据了。</p>
+<pre><div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-tsx" style="white-space:pre"><span style="color:#b48ead">export</span><span> </span><span style="color:#b48ead">async</span><span> </span><span class="hljs-function" style="color:#b48ead">function</span><span class="hljs-function"> </span><span class="hljs-function" style="color:#8fa1b3">getStaticProps</span><span class="hljs-function">(</span><span class="hljs-function" style="color:#d08770">context</span><span class="hljs-function">) </span><span>{
+</span><span>    </span><span style="color:#b48ead">const</span><span> res = </span><span style="color:#b48ead">await</span><span> fetch(</span><span style="color:#a3be8c">`https://service-go08i9b4-1301241041.gz.apigw.tencentcs.com/products`</span><span>);
+</span><span>    </span><span style="color:#b48ead">const</span><span> products = </span><span style="color:#b48ead">await</span><span> res.json();
+</span>
+<span>    </span><span style="color:#b48ead">if</span><span> (!products) {
+</span><span>        </span><span style="color:#b48ead">return</span><span> {
+</span><span>            </span><span class="hljs-attr">notFound</span><span>: </span><span style="color:#d08770">true</span><span>,
+</span>        }
+<!-- -->    }
+<!-- -->
+<span>    </span><span style="color:#b48ead">return</span><span> {
+</span><span>        </span><span class="hljs-attr">props</span><span>: { </span><span class="hljs-attr">products</span><span>: products </span><span style="color:#b48ead">as</span><span> Products }, </span><span style="color:#65737e">// will be passed to the page component as props</span><span>
+</span>    }
+<!-- -->}
+</code></div></pre>
+<ol start="2">
+<li>getServerSideProps</li>
+</ol>
+<p>使用getServerSideProps方法，next.js会在每一次请求的时候将返回结果作为props传给组件。使用getServerSideProps来获取数据，虽然剧有实时性，但是响应速度将比getStaticProps慢，因为每一次都需要请求新的数据然后计算结果，并且不能在没有额外的配置下被CDN缓存。</p>
+<pre><div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-js" style="white-space:pre"><span class="hljs-function" style="color:#b48ead">function</span><span class="hljs-function"> </span><span class="hljs-function" style="color:#8fa1b3">Page</span><span class="hljs-function">(</span><span class="hljs-function" style="color:#d08770">{ data }</span><span class="hljs-function">) </span><span>{
+</span><span>  </span><span style="color:#65737e">// Render data...</span><span>
+</span>}
+<!-- -->
+<span></span><span style="color:#65737e">// This gets called on every request</span><span>
+</span><span></span><span style="color:#b48ead">export</span><span> </span><span style="color:#b48ead">async</span><span> </span><span class="hljs-function" style="color:#b48ead">function</span><span class="hljs-function"> </span><span class="hljs-function" style="color:#8fa1b3">getServerSideProps</span><span class="hljs-function">(</span><span class="hljs-function">) </span><span>{
+</span><span>  </span><span style="color:#65737e">// Fetch data from external API</span><span>
+</span><span>  </span><span style="color:#b48ead">const</span><span> res = </span><span style="color:#b48ead">await</span><span> fetch(</span><span style="color:#a3be8c">`https://.../data`</span><span>)
+</span><span>  </span><span style="color:#b48ead">const</span><span> data = </span><span style="color:#b48ead">await</span><span> res.json()
+</span>
+<span>  </span><span style="color:#65737e">// Pass data to the page via props</span><span>
+</span><span>  </span><span style="color:#b48ead">return</span><span> { </span><span class="hljs-attr">props</span><span>: { data } }
+</span>}
+<!-- -->
+<span></span><span style="color:#b48ead">export</span><span> </span><span style="color:#b48ead">default</span><span> Page
+</span></code></div></pre>
+<h5>CSS支持</h5>
+<ol>
+<li>
+<p>全局样式</p>
+<p>在<div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>pages/_app.tsx</span></code></div>中导入css文件，同样支持从<div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>node_modules</span></code></div>目录导入。</p>
+<pre><div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-tsx" style="white-space:pre"><span style="color:#b48ead">import</span><span> </span><span style="color:#a3be8c">&#x27;../styles/globals.css&#x27;</span><span>
+</span><span></span><span style="color:#b48ead">import</span><span> </span><span style="color:#a3be8c">&#x27;bootstrap/dist/css/bootstrap.css&#x27;</span><span>
+</span></code></div></pre>
+</li>
+<li>
+<p>组件样式</p>
+<p>Next.js 通过 <div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>[name].module.css</span></code></div> 文件命名约定来支持 <a href="https://github.com/css-modules/css-modules">CSS 模块</a> 。</p>
+<p>例如，假设 <div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>components/</span></code></div> 目录下有一个可重用 <div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>Button</span></code></div> 组件：</p>
+<p>首先，创建 <div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>components/Button.module.css</span></code></div> 文件并填入以下内容：</p>
+<pre><div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-css" style="white-space:pre"><span style="color:#bf616a">.error</span><span> {
+</span><span>  </span><span style="color:#ebcb8b">color</span><span>: white;
+</span><span>  </span><span style="color:#ebcb8b">background-color</span><span>: red;
+</span>}
+</code></div></pre>
+<p>然后，创建 <div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>components/Button.js</span></code></div> 文件，导入（import）并使用上述 CSS 文件：</p>
+<pre><div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-js" style="white-space:pre"><span style="color:#b48ead">import</span><span> styles </span><span style="color:#b48ead">from</span><span> </span><span style="color:#a3be8c">&#x27;./Button.module.css&#x27;</span><span>
+</span>
+<span>export </span><span style="color:#b48ead">function</span><span> Button() {
+</span><span>  </span><span style="color:#b48ead">return</span><span> (
+</span>    &lt;button
+<span>      </span><span style="color:#b48ead">type</span><span>=&quot;button&quot;
+</span><span>      // Note how the &quot;error&quot; </span><span style="color:#b48ead">class</span><span> </span><span style="color:#b48ead">is</span><span> accessed </span><span style="color:#b48ead">as</span><span> a property </span><span style="color:#b48ead">on</span><span> the imported
+</span><span>      // `styles` </span><span style="color:#b48ead">object</span><span>.
+</span>      className={styles.error}
+<!-- -->    &gt;
+<!-- -->      Destroy
+<!-- -->    &lt;/button&gt;
+<!-- -->  )
+<!-- -->}
+</code></div></pre>
+<p>另外，Next.js允许导入（import）具有 <div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>.scss</span></code></div> 和 <div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>.sass</span></code></div> 扩展名的 Sass 文件，只要确保安装了sass，即可使用。</p>
+</li>
+</ol>
+<h5>常用组件</h5>
+<ol>
+<li>
+<p><div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>next/image</span></code></div></p>
+<p>Next.js 的 Image 组件（即 <a href="https://www.nextjs.cn/docs/api-reference/next/image"><div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>next/image</span></code></div></a>）是对 HTML 的 <div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>&lt;img&gt;</span></code></div> 元素的扩展，跟进了最新的 web 技术。</p>
+<p>自动图片优化功能（Automatic Image Optimization）能够调整图片尺寸、优化图片并以最新的 <a href="https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Image_types">WebP</a> 格式传输图片（如果浏览器支持 WebP 格式的话）。这样就可以避免将较大的图片传送到视口（viewport）较小的设备上。此功能还允许 Next.js 自动采用未来的图片格式，并将其传输给支持这些格式的浏览器。</p>
+<p>自动图片优化功能可以支持任何图片来源。即使是托管在外部数据源上（例如，CMS），仍可对图片进行优化。</p>
+<p>Next.js 无需在构建时优化图片，而是根据用户的请求按需优化图片。与静态站点生成器和纯静态解决方案不同，无论发布 10 张还是 1000 万张图片，构建时间都不会增加。</p>
+<p>图片默认是延迟加载的。这意味着你的页面不会因为加载视口（viewport）外的图片而影响页面的加载速度。当图片进入视口（viewport）时才加载。</p>
+<p>始终以这种方式渲染图片是为了避免 <a href="https://web.dev/cls/">累计布局偏移（Cumulative Layout Shift）</a>，此 <a href="https://web.dev/vitals/">Core Web Vital</a> 被 Google 作为参数用于 <a href="https://webmasters.googleblog.com/2020/05/evaluating-page-experience.html">搜索排名</a>。</p>
+<p>使用：</p>
+<pre><div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-jsx" style="white-space:pre"><span style="color:#b48ead">import</span><span> Image </span><span style="color:#b48ead">from</span><span> </span><span style="color:#a3be8c">&#x27;next/image&#x27;</span><span>
+</span>
+<span></span><span class="hljs-function" style="color:#b48ead">function</span><span class="hljs-function"> </span><span class="hljs-function" style="color:#8fa1b3">Home</span><span class="hljs-function">(</span><span class="hljs-function">) </span><span>{
+</span><span>  </span><span style="color:#b48ead">return</span><span> (
+</span><span>    </span><span class="xml" style="color:#bf616a">&lt;&gt;</span><span class="xml">
+</span><span class="xml">      </span><span class="xml" style="color:#bf616a">&lt;</span><span class="xml" style="color:#bf616a">h1</span><span class="xml" style="color:#bf616a">&gt;</span><span class="xml">My Homepage</span><span class="xml" style="color:#bf616a">&lt;/</span><span class="xml" style="color:#bf616a">h1</span><span class="xml" style="color:#bf616a">&gt;</span><span class="xml">
+</span><span class="xml">      </span><span class="xml" style="color:#bf616a">&lt;</span><span class="xml" style="color:#bf616a">Image</span><span class="xml" style="color:#bf616a">
+</span><span class="xml" style="color:#bf616a">        </span><span class="xml hljs-attr" style="color:#bf616a">src</span><span class="xml" style="color:#bf616a">=</span><span class="xml" style="color:#a3be8c">&quot;/me.png&quot;</span><span class="xml" style="color:#bf616a">
+</span><span class="xml" style="color:#bf616a">        </span><span class="xml hljs-attr" style="color:#bf616a">alt</span><span class="xml" style="color:#bf616a">=</span><span class="xml" style="color:#a3be8c">&quot;Picture of the author&quot;</span><span class="xml" style="color:#bf616a">
+</span><span class="xml" style="color:#bf616a">        </span><span class="xml hljs-attr" style="color:#bf616a">width</span><span class="xml" style="color:#bf616a">=</span><span class="xml" style="color:#a3be8c">{500}</span><span class="xml" style="color:#bf616a">
+</span><span class="xml" style="color:#bf616a">        </span><span class="xml hljs-attr" style="color:#bf616a">height</span><span class="xml" style="color:#bf616a">=</span><span class="xml" style="color:#a3be8c">{500}</span><span class="xml" style="color:#bf616a">
+</span><span class="xml" style="color:#bf616a">      /&gt;</span><span class="xml">
+</span><span class="xml">      </span><span class="xml" style="color:#bf616a">&lt;</span><span class="xml" style="color:#bf616a">p</span><span class="xml" style="color:#bf616a">&gt;</span><span class="xml">Welcome to my homepage!</span><span class="xml" style="color:#bf616a">&lt;/</span><span class="xml" style="color:#bf616a">p</span><span class="xml" style="color:#bf616a">&gt;</span><span class="xml">
+</span><span class="xml">    </span><span class="xml" style="color:#bf616a">&lt;/&gt;</span><span>
+</span>  )
+<!-- -->}
+<!-- -->
+<span></span><span style="color:#b48ead">export</span><span> </span><span style="color:#b48ead">default</span><span> Home
+</span></code></div></pre>
+</li>
+<li>
+<p><div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>next/head</span></code></div></p>
+<p>用于将 HTML 标签添加到页面的 <div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>head</span></code></div> 中</p>
+<pre><div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-js" style="white-space:pre"><span style="color:#b48ead">import</span><span> Head </span><span style="color:#b48ead">from</span><span> </span><span style="color:#a3be8c">&#x27;next/head&#x27;</span><span>
+</span>
+<span></span><span class="hljs-function" style="color:#b48ead">function</span><span class="hljs-function"> </span><span class="hljs-function" style="color:#8fa1b3">IndexPage</span><span class="hljs-function">(</span><span class="hljs-function">) </span><span>{
+</span><span>  </span><span style="color:#b48ead">return</span><span> (
+</span><span>    </span><span class="xml" style="color:#bf616a">&lt;</span><span class="xml" style="color:#bf616a">div</span><span class="xml" style="color:#bf616a">&gt;</span><span class="xml">
+</span><span class="xml">      </span><span class="xml" style="color:#bf616a">&lt;</span><span class="xml" style="color:#bf616a">Head</span><span class="xml" style="color:#bf616a">&gt;</span><span class="xml">
+</span><span class="xml">        </span><span class="xml" style="color:#bf616a">&lt;</span><span class="xml" style="color:#bf616a">title</span><span class="xml" style="color:#bf616a">&gt;</span><span class="xml">My page title</span><span class="xml" style="color:#bf616a">&lt;/</span><span class="xml" style="color:#bf616a">title</span><span class="xml" style="color:#bf616a">&gt;</span><span class="xml">
+</span><span class="xml">        </span><span class="xml" style="color:#bf616a">&lt;</span><span class="xml" style="color:#bf616a">meta</span><span class="xml" style="color:#bf616a"> </span><span class="xml hljs-attr" style="color:#bf616a">name</span><span class="xml" style="color:#bf616a">=</span><span class="xml" style="color:#a3be8c">&quot;viewport&quot;</span><span class="xml" style="color:#bf616a"> </span><span class="xml hljs-attr" style="color:#bf616a">content</span><span class="xml" style="color:#bf616a">=</span><span class="xml" style="color:#a3be8c">&quot;initial-scale=1.0, width=device-width&quot;</span><span class="xml" style="color:#bf616a"> /&gt;</span><span class="xml">
+</span><span class="xml">      </span><span class="xml" style="color:#bf616a">&lt;/</span><span class="xml" style="color:#bf616a">Head</span><span class="xml" style="color:#bf616a">&gt;</span><span class="xml">
+</span><span class="xml">      </span><span class="xml" style="color:#bf616a">&lt;</span><span class="xml" style="color:#bf616a">p</span><span class="xml" style="color:#bf616a">&gt;</span><span class="xml">Hello world!</span><span class="xml" style="color:#bf616a">&lt;/</span><span class="xml" style="color:#bf616a">p</span><span class="xml" style="color:#bf616a">&gt;</span><span class="xml">
+</span><span class="xml">    </span><span class="xml" style="color:#bf616a">&lt;/</span><span class="xml" style="color:#bf616a">div</span><span class="xml" style="color:#bf616a">&gt;</span><span>
+</span>  )
+<!-- -->}
+<!-- -->
+<span></span><span style="color:#b48ead">export</span><span> </span><span style="color:#b48ead">default</span><span> IndexPage
+</span></code></div></pre>
+</li>
+</ol>
+<h4>配置</h4>
+<h5>简介</h5>
+<p>对于 Next.js 的自定义高级行为，可以在项目目录的根目录（package.json 旁边）创建一个 next.config.js。</p>
+<p><div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>next.config.js</span></code></div>是一个Node.js模块，不是一个json文件。</p>
+<p>定义如下：</p>
+<pre><div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-js" style="white-space:pre"><span style="color:#b48ead">module</span><span>.</span><span style="color:#b48ead">exports</span><span> = {
+</span><span>  </span><span style="color:#65737e">/* config options here */</span><span>
+</span>}
+</code></div></pre>
+<p>也可以使用一个函数：</p>
+<pre><div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-js" style="white-space:pre"><span style="color:#d08770">module</span><span>.</span><span style="color:#d08770">exports</span><span> = </span><span class="hljs-function" style="color:#d08770">(phase, { defaultConfig })</span><span class="hljs-function"> =&gt;</span><span> {
+</span><span>  </span><span style="color:#b48ead">return</span><span> {
+</span>    /* config options here */
+<!-- -->  }
+<!-- -->}
+</code></div></pre>
+<p>通过config的类型大概可以知道它支持哪些配置：</p>
+<pre><div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-typescript" style="white-space:pre"><span style="color:#b48ead">export</span><span> </span><span style="color:#b48ead">declare</span><span> </span><span style="color:#b48ead">type</span><span> NextConfig = {
+</span><span>    [key: </span><span style="color:#d08770">string</span><span>]: </span><span style="color:#d08770">any</span><span>;
+</span>} &amp; {
+<span>    i18n?: I18NConfig | </span><span style="color:#d08770">null</span><span>;
+</span>    eslint?: ESLintConfig;
+<!-- -->    typescript?: TypeScriptConfig;
+<span>    headers?: </span><span class="hljs-function">() =&gt;</span><span> </span><span style="color:#d08770">Promise</span><span>&lt;Header[]&gt;;
+</span><span>    rewrites?: </span><span class="hljs-function">() =&gt;</span><span> </span><span style="color:#d08770">Promise</span><span>&lt;Rewrite[] | {
+</span><span>        </span><span class="hljs-attr">beforeFiles</span><span>: Rewrite[];
+</span>        afterFiles: Rewrite[];
+<!-- -->        fallback: Rewrite[];
+<!-- -->    }&gt;;
+<span>    redirects?: </span><span class="hljs-function">() =&gt;</span><span> </span><span style="color:#d08770">Promise</span><span>&lt;Redirect[]&gt;;
+</span><span>    webpack5?: </span><span style="color:#d08770">false</span><span>;
+</span><span>    excludeDefaultMomentLocales?: </span><span style="color:#d08770">boolean</span><span>;
+</span><span>    webpack?: (</span><span class="hljs-function">(</span><span class="hljs-function" style="color:#d08770">config: </span><span class="hljs-function" style="color:#d08770">any</span><span class="hljs-function" style="color:#d08770">, context: {
+</span><span class="hljs-function" style="color:#d08770">        dir: </span><span class="hljs-function" style="color:#d08770">string</span><span class="hljs-function" style="color:#d08770">;
+</span><span class="hljs-function" style="color:#d08770">        dev: </span><span class="hljs-function" style="color:#d08770">boolean</span><span class="hljs-function" style="color:#d08770">;
+</span><span class="hljs-function" style="color:#d08770">        isServer: </span><span class="hljs-function" style="color:#d08770">boolean</span><span class="hljs-function" style="color:#d08770">;
+</span><span class="hljs-function" style="color:#d08770">        buildId: </span><span class="hljs-function" style="color:#d08770">string</span><span class="hljs-function" style="color:#d08770">;
+</span><span class="hljs-function" style="color:#d08770">        config: NextConfigComplete;
+</span><span class="hljs-function" style="color:#d08770">        defaultLoaders: {
+</span><span class="hljs-function" style="color:#d08770">            babel: </span><span class="hljs-function" style="color:#d08770">any</span><span class="hljs-function" style="color:#d08770">;
+</span><span class="hljs-function" style="color:#d08770">        };
+</span><span class="hljs-function" style="color:#d08770">        totalPages: </span><span class="hljs-function" style="color:#d08770">number</span><span class="hljs-function" style="color:#d08770">;
+</span><span class="hljs-function" style="color:#d08770">        webpack: </span><span class="hljs-function" style="color:#d08770">any</span><span class="hljs-function" style="color:#d08770">;
+</span><span class="hljs-function" style="color:#d08770">    }</span><span class="hljs-function">) =&gt;</span><span> </span><span style="color:#d08770">any</span><span>) | </span><span style="color:#d08770">null</span><span>;
+</span><span>    trailingSlash?: </span><span style="color:#d08770">boolean</span><span>;
+</span>    env?: {
+<span>        [key: </span><span style="color:#d08770">string</span><span>]: </span><span style="color:#d08770">string</span><span>;
+</span>    };
+<span>    distDir?: </span><span style="color:#d08770">string</span><span>;
+</span><span>    cleanDistDir?: </span><span style="color:#d08770">boolean</span><span>;
+</span><span>    assetPrefix?: </span><span style="color:#d08770">string</span><span>;
+</span><span>    useFileSystemPublicRoutes?: </span><span style="color:#d08770">boolean</span><span>;
+</span><span>    generateBuildId?: </span><span class="hljs-function">() =&gt;</span><span> </span><span style="color:#d08770">string</span><span> | </span><span style="color:#d08770">null</span><span> | </span><span style="color:#d08770">Promise</span><span>&lt;</span><span style="color:#d08770">string</span><span> | </span><span style="color:#d08770">null</span><span>&gt;;
+</span><span>    generateEtags?: </span><span style="color:#d08770">boolean</span><span>;
+</span><span>    pageExtensions?: </span><span style="color:#d08770">string</span><span>[];
+</span><span>    compress?: </span><span style="color:#d08770">boolean</span><span>;
+</span><span>    poweredByHeader?: </span><span style="color:#d08770">boolean</span><span>;
+</span>    images?: ImageConfig;
+<!-- -->    devIndicators?: {
+<span>        buildActivity?: </span><span style="color:#d08770">boolean</span><span>;
+</span>    };
+<!-- -->    onDemandEntries?: {
+<span>        maxInactiveAge?: </span><span style="color:#d08770">number</span><span>;
+</span><span>        pagesBufferLength?: </span><span style="color:#d08770">number</span><span>;
+</span>    };
+<!-- -->    amp?: {
+<span>        canonicalBase?: </span><span style="color:#d08770">string</span><span>;
+</span>    };
+<span>    basePath?: </span><span style="color:#d08770">string</span><span>;
+</span>    sassOptions?: {
+<span>        [key: </span><span style="color:#d08770">string</span><span>]: </span><span style="color:#d08770">any</span><span>;
+</span>    };
+<span>    productionBrowserSourceMaps?: </span><span style="color:#d08770">boolean</span><span>;
+</span><span>    optimizeFonts?: </span><span style="color:#d08770">boolean</span><span>;
+</span><span>    reactStrictMode?: </span><span style="color:#d08770">boolean</span><span>;
+</span>    publicRuntimeConfig?: {
+<span>        [key: </span><span style="color:#d08770">string</span><span>]: </span><span style="color:#d08770">any</span><span>;
+</span>    };
+<!-- -->    serverRuntimeConfig?: {
+<span>        [key: </span><span style="color:#d08770">string</span><span>]: </span><span style="color:#d08770">any</span><span>;
+</span>    };
+<!-- -->    httpAgentOptions?: {
+<span>        keepAlive?: </span><span style="color:#d08770">boolean</span><span>;
+</span>    };
+<!-- -->    future?: {
+<span>        </span><span style="color:#65737e">/**
+</span><span style="color:#65737e">         * </span><span class="hljs-doctag" style="color:#65737e">@deprecated </span><span style="color:#65737e">this options was moved to the top level
+</span><span style="color:#65737e">         */</span><span>
+</span><span>        webpack5?: </span><span style="color:#d08770">false</span><span>;
+</span><span>        strictPostcssConfiguration?: </span><span style="color:#d08770">boolean</span><span>;
+</span>    };
+<!-- -->    experimental?: {
+<span>        swcMinify?: </span><span style="color:#d08770">boolean</span><span>;
+</span><span>        swcLoader?: </span><span style="color:#d08770">boolean</span><span>;
+</span><span>        cpus?: </span><span style="color:#d08770">number</span><span>;
+</span><span>        sharedPool?: </span><span style="color:#d08770">boolean</span><span>;
+</span><span>        plugins?: </span><span style="color:#d08770">boolean</span><span>;
+</span><span>        profiling?: </span><span style="color:#d08770">boolean</span><span>;
+</span><span>        isrFlushToDisk?: </span><span style="color:#d08770">boolean</span><span>;
+</span><span>        reactMode?: </span><span style="color:#a3be8c">&#x27;legacy&#x27;</span><span> | </span><span style="color:#a3be8c">&#x27;concurrent&#x27;</span><span> | </span><span style="color:#a3be8c">&#x27;blocking&#x27;</span><span>;
+</span><span>        workerThreads?: </span><span style="color:#d08770">boolean</span><span>;
+</span><span>        pageEnv?: </span><span style="color:#d08770">boolean</span><span>;
+</span><span>        optimizeImages?: </span><span style="color:#d08770">boolean</span><span>;
+</span><span>        optimizeCss?: </span><span style="color:#d08770">boolean</span><span>;
+</span><span>        scrollRestoration?: </span><span style="color:#d08770">boolean</span><span>;
+</span><span>        stats?: </span><span style="color:#d08770">boolean</span><span>;
+</span><span>        externalDir?: </span><span style="color:#d08770">boolean</span><span>;
+</span><span>        conformance?: </span><span style="color:#d08770">boolean</span><span>;
+</span>        amp?: {
+<span>            optimizer?: </span><span style="color:#d08770">any</span><span>;
+</span><span>            validator?: </span><span style="color:#d08770">string</span><span>;
+</span><span>            skipValidation?: </span><span style="color:#d08770">boolean</span><span>;
+</span>        };
+<span>        reactRoot?: </span><span style="color:#d08770">boolean</span><span>;
+</span><span>        disableOptimizedLoading?: </span><span style="color:#d08770">boolean</span><span>;
+</span><span>        gzipSize?: </span><span style="color:#d08770">boolean</span><span>;
+</span><span>        craCompat?: </span><span style="color:#d08770">boolean</span><span>;
+</span><span>        esmExternals?: </span><span style="color:#d08770">boolean</span><span> | </span><span style="color:#a3be8c">&#x27;loose&#x27;</span><span>;
+</span><span>        staticPageGenerationTimeout?: </span><span style="color:#d08770">number</span><span>;
+</span><span>        isrMemoryCacheSize?: </span><span style="color:#d08770">number</span><span>;
+</span><span>        nftTracing?: </span><span style="color:#d08770">boolean</span><span>;
+</span><span>        concurrentFeatures?: </span><span style="color:#d08770">boolean</span><span>;
+</span>    };
+<!-- -->};
+</code></div></pre>
+<h4>部署</h4>
+<p>next的部署主要有三种方式</p>
+<h5>Vercel</h5>
+<p>Vercel (之前也叫 Zeit 或 now.sh) 是一家提供静态网站托管的云平台，支持从 Github, GitLab, Bitbucket 等代码仓库中自动拉取代码 然后进行项目打包和部署等功能。但是国内访问速度较慢，在此不多做介绍。</p>
+<h5>Node.js服务</h5>
+<p>Next.js 可以部署到任何支持 Node.js 的托管提供商处。</p>
+<p>确保你的 <div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>package.json</span></code></div> 文件中设置了 <div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span style="color:#a3be8c">&quot;build&quot;</span></code></div> 和 <div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span style="color:#a3be8c">&quot;start&quot;</span></code></div> 脚本：</p>
+<pre><div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-json" style="white-space:pre"><span>{
+</span><span>  </span><span class="hljs-attr">&quot;scripts&quot;</span><span>: {
+</span><span>    </span><span class="hljs-attr">&quot;dev&quot;</span><span>: </span><span style="color:#a3be8c">&quot;next&quot;</span><span>,
+</span><span>    </span><span class="hljs-attr">&quot;build&quot;</span><span>: </span><span style="color:#a3be8c">&quot;next build&quot;</span><span>,
+</span><span>    </span><span class="hljs-attr">&quot;start&quot;</span><span>: </span><span style="color:#a3be8c">&quot;next start&quot;</span><span>
+</span>  }
+<!-- -->}
+</code></div></pre>
+<h5>Docker Image</h5>
+<p>打成镜像，可以部署到docker容器里，也可以部署到容器编排器里（kubernetes或者HashiCorp Nomad）。</p>
+<p>Dockerfile文件参考：</p>
+<pre><div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-dockerfile" style="white-space:pre"><span style="color:#65737e"># Install dependencies only when needed</span><span>
+</span><span></span><span style="color:#b48ead">FROM</span><span> node:alpine AS deps
+</span><span></span><span style="color:#65737e"># Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.</span><span>
+</span><span></span><span style="color:#b48ead">RUN</span><span class="bash"> apk add --no-cache libc6-compat</span><span>
+</span><span></span><span style="color:#b48ead">WORKDIR</span><span class="bash"> /app</span><span>
+</span><span></span><span style="color:#b48ead">COPY</span><span class="bash"> package.json yarn.lock ./</span><span>
+</span><span></span><span style="color:#b48ead">RUN</span><span class="bash"> yarn install --frozen-lockfile</span><span>
+</span>
+<span></span><span style="color:#65737e"># Rebuild the source code only when needed</span><span>
+</span><span></span><span style="color:#b48ead">FROM</span><span> node:alpine AS builder
+</span><span></span><span style="color:#b48ead">WORKDIR</span><span class="bash"> /app</span><span>
+</span><span></span><span style="color:#b48ead">COPY</span><span class="bash"> . .</span><span>
+</span><span></span><span style="color:#b48ead">COPY</span><span class="bash"> --from=deps /app/node_modules ./node_modules</span><span>
+</span><span></span><span style="color:#b48ead">RUN</span><span class="bash"> yarn build &amp;&amp; yarn install --production --ignore-scripts --prefer-offline</span><span>
+</span>
+<span></span><span style="color:#65737e"># Production image, copy all the files and run next</span><span>
+</span><span></span><span style="color:#b48ead">FROM</span><span> node:alpine AS runner
+</span><span></span><span style="color:#b48ead">WORKDIR</span><span class="bash"> /app</span><span>
+</span>
+<span></span><span style="color:#b48ead">ENV</span><span> NODE_ENV production
+</span>
+<span></span><span style="color:#b48ead">RUN</span><span class="bash"> addgroup -g 1001 -S nodejs</span><span>
+</span><span></span><span style="color:#b48ead">RUN</span><span class="bash"> adduser -S nextjs -u 1001</span><span>
+</span>
+<span></span><span style="color:#65737e"># You only need to copy next.config.js if you are NOT using the default configuration</span><span>
+</span><span></span><span style="color:#65737e"># COPY --from=builder /app/next.config.js ./</span><span>
+</span><span></span><span style="color:#b48ead">COPY</span><span class="bash"> --from=builder /app/public ./public</span><span>
+</span><span></span><span style="color:#b48ead">COPY</span><span class="bash"> --from=builder --chown=nextjs:nodejs /app/.next ./.next</span><span>
+</span><span></span><span style="color:#b48ead">COPY</span><span class="bash"> --from=builder /app/node_modules ./node_modules</span><span>
+</span><span></span><span style="color:#b48ead">COPY</span><span class="bash"> --from=builder /app/package.json ./package.json</span><span>
+</span>
+<span></span><span style="color:#b48ead">USER</span><span> nextjs
+</span>
+<span></span><span style="color:#b48ead">EXPOSE</span><span> </span><span style="color:#d08770">3000</span><span>
+</span>
+<span></span><span style="color:#65737e"># Next.js collects completely anonymous telemetry data about general usage.</span><span>
+</span><span></span><span style="color:#65737e"># Learn more here: https://nextjs.org/telemetry</span><span>
+</span><span></span><span style="color:#65737e"># Uncomment the following line in case you want to disable telemetry.</span><span>
+</span><span></span><span style="color:#65737e"># ENV NEXT_TELEMETRY_DISABLED 1</span><span>
+</span>
+<span></span><span style="color:#b48ead">CMD</span><span class="bash"> [</span><span class="bash" style="color:#a3be8c">&quot;yarn&quot;</span><span class="bash">, </span><span class="bash" style="color:#a3be8c">&quot;start&quot;</span><span class="bash">]</span><span>
+</span></code></div></pre>
+<h5>导出静态文件</h5>
+<p>执行<div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>next build</span></code></div> 和 <div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>next </span><span style="color:#b48ead">export</span></code></div></p>
+<p>符合以下任何一项，将不允许使用静态导出：</p>
+<ul>
+<li>使用<div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>getStaticPaths</span></code></div>的<div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>fallback: </span><span style="color:#d08770">true</span></code></div>模式</li>
+<li>使用了<div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>next/Image</span></code></div>组件，并且使用默认</li>
+<li>使用了<div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>getServerSideProps</span></code></div>来获取数据</li>
+<li>使用国际化路由</li>
+<li>使用API路由</li>
+</ul></div></main><footer></footer></div></div><script id="__NEXT_DATA__" type="application/json">{"props":{"pageProps":{"source":{"compiledSource":"/*@jsxRuntime automatic @jsxImportSource react*/\nconst {Fragment: _Fragment, jsx: _jsx, jsxs: _jsxs} = arguments[0];\nconst {useMDXComponents: _provideComponents} = arguments[0];\nfunction MDXContent(props = {}) {\n  const {wrapper: MDXLayout} = Object.assign({}, _provideComponents(), props.components);\n  return MDXLayout ? _jsx(MDXLayout, Object.assign({}, props, {\n    children: _jsx(_createMdxContent, {})\n  })) : _createMdxContent();\n  function _createMdxContent() {\n    const _components = Object.assign({\n      h1: \"h1\",\n      p: \"p\",\n      h3: \"h3\",\n      h4: \"h4\",\n      code: \"code\",\n      h5: \"h5\",\n      ul: \"ul\",\n      li: \"li\",\n      pre: \"pre\",\n      strong: \"strong\",\n      a: \"a\",\n      ol: \"ol\"\n    }, _provideComponents(), props.components);\n    return _jsxs(_Fragment, {\n      children: [_jsx(_components.h1, {\n        children: \"Next.js 基本使用\"\n      }), \"\\n\", _jsx(_components.p, {\n        children: \"next.js 是基于React的前端框架，主要用于支持静态渲染或服务端渲染。\"\n      }), \"\\n\", _jsx(_components.h3, {\n        children: \"背景\"\n      }), \"\\n\", _jsx(_components.h4, {\n        children: \"SPA 💆\"\n      }), \"\\n\", _jsxs(_components.p, {\n        children: [\"single-page application，即单页面应用，是一种网络应用程序或网站的模型，它通过动态重写当前页面来与用户交互，避免了页面之间切换打断用户体验。所有必要的代码（\", _jsx(_components.code, {\n          children: \"HTML\"\n        }), \"、\", _jsx(_components.code, {\n          children: \"JavaScript\"\n        }), \"和\", _jsx(_components.code, {\n          children: \"CSS\"\n        }), \"）都通过单个页面的加载而检索，或者根据需要（通常是为响应用户操作）动态装载适当的资源并添加到页面，页面在任何时间点都不会重新加载，也不会将控制转移到其他页面。\"]\n      }), \"\\n\", _jsx(_components.h5, {\n        children: \"优缺点\"\n      }), \"\\n\", _jsx(_components.p, {\n        children: \"优点：\"\n      }), \"\\n\", _jsxs(_components.ul, {\n        children: [\"\\n\", _jsxs(_components.li, {\n          children: [\"\\n\", _jsx(_components.p, {\n            children: \"用户体验好，页面切换速度快\"\n          }), \"\\n\"]\n        }), \"\\n\", _jsxs(_components.li, {\n          children: [\"\\n\", _jsx(_components.p, {\n            children: \"良好的前后端分离，分工明确\"\n          }), \"\\n\"]\n        }), \"\\n\"]\n      }), \"\\n\", _jsx(_components.p, {\n        children: \"缺点：\"\n      }), \"\\n\", _jsxs(_components.ul, {\n        children: [\"\\n\", _jsxs(_components.li, {\n          children: [\"\\n\", _jsx(_components.p, {\n            children: \"不利于SEO\"\n          }), \"\\n\"]\n        }), \"\\n\", _jsxs(_components.li, {\n          children: [\"\\n\", _jsx(_components.p, {\n            children: \"首屏渲染速度较慢\"\n          }), \"\\n\"]\n        }), \"\\n\"]\n      }), \"\\n\", _jsx(_components.h4, {\n        children: \"CSR 和 SSR\"\n      }), \"\\n\", _jsx(_components.p, {\n        children: \"CSR：Client Side Render，即客户端渲染，服务端只返回一个html模板，页面的内容通过运行js运行。Angular、React和Vue构建的应用，默认都是客户端渲染。\"\n      }), \"\\n\", _jsx(_components.p, {\n        children: \"SSR：Server Side Render，即服务端渲染。页面上的内容通过服务端渲染生成，然后再将完整的html返回给浏览器。\"\n      }), \"\\n\", _jsx(_components.h3, {\n        children: \"快速开始\"\n      }), \"\\n\", _jsx(_components.h4, {\n        children: \"创建项目\"\n      }), \"\\n\", _jsxs(_components.p, {\n        children: [\"使用\", _jsx(_components.code, {\n          children: \"create-next-app\"\n        }), \"创建新的 Next.js 应用程序\"]\n      }), \"\\n\", _jsx(_components.pre, {\n        children: _jsx(_components.code, {\n          className: \"language-bash\",\n          children: \"npx create-next-app --typescript\\n# or\\nyarn create next-app --typescript\\n\"\n        })\n      }), \"\\n\", _jsx(_components.h4, {\n        children: \"基本特性\"\n      }), \"\\n\", _jsx(_components.h5, {\n        children: \"页面\"\n      }), \"\\n\", _jsxs(_components.p, {\n        children: [\"在 Next.js 中，一个 \", _jsx(_components.strong, {\n          children: \"page（页面）\"\n        }), \" 就是一个从 \", _jsx(_components.code, {\n          children: \".js\"\n        }), \"、\", _jsx(_components.code, {\n          children: \"jsx\"\n        }), \"、\", _jsx(_components.code, {\n          children: \".ts\"\n        }), \" 或 \", _jsx(_components.code, {\n          children: \".tsx\"\n        }), \" 文件导出（export）的 \", _jsx(_components.a, {\n          href: \"https://reactjs.org/docs/components-and-props.html\",\n          children: \"React 组件\"\n        }), \" ，这些文件存放在 \", _jsx(_components.code, {\n          children: \"pages\"\n        }), \" 目录下。每个 page（页面）都使用其文件名作为路由（route）。\"]\n      }), \"\\n\", _jsx(_components.h5, {\n        children: \"路由\"\n      }), \"\\n\", _jsx(_components.p, {\n        children: \"​\\t文件目录 → 路由\"\n      }), \"\\n\", _jsxs(_components.ul, {\n        children: [\"\\n\", _jsxs(_components.li, {\n          children: [_jsx(_components.code, {\n            children: \"pages/index.js\"\n          }), \"  → \", _jsx(_components.code, {\n            children: \"/\"\n          })]\n        }), \"\\n\", _jsxs(_components.li, {\n          children: [_jsx(_components.code, {\n            children: \"pages/blog/index.js\"\n          }), \" → \", _jsx(_components.code, {\n            children: \"/blog\"\n          })]\n        }), \"\\n\", _jsxs(_components.li, {\n          children: [_jsx(_components.code, {\n            children: \"pages/blog.js\"\n          }), \"→ \", _jsx(_components.code, {\n            children: \"/blog\"\n          })]\n        }), \"\\n\", _jsxs(_components.li, {\n          children: [_jsx(_components.code, {\n            children: \"pages/blog/[id].js\"\n          }), \"→ \", _jsx(_components.code, {\n            children: \"/blog/:id\"\n          })]\n        }), \"\\n\", _jsxs(_components.li, {\n          children: [_jsx(_components.code, {\n            children: \"pages/[username]/settings.js\"\n          }), \" → \", _jsx(_components.code, {\n            children: \"/:username/settings\"\n          })]\n        }), \"\\n\", _jsxs(_components.li, {\n          children: [_jsx(_components.code, {\n            children: \"pages/post/[...all].js\"\n          }), \" → \", _jsx(_components.code, {\n            children: \"/post/*\"\n          }), \" (\", _jsx(_components.code, {\n            children: \"/post/2020/id/title\"\n          }), \")\"]\n        }), \"\\n\"]\n      }), \"\\n\", _jsx(_components.p, {\n        children: \"通过useRouter获取动态参数，如下：\"\n      }), \"\\n\", _jsx(_components.pre, {\n        children: _jsx(_components.code, {\n          className: \"language-tsx\",\n          children: \"const router = useRouter();\\nconst { all } = router.query;\\n\"\n        })\n      }), \"\\n\", _jsx(_components.p, {\n        children: \"路由跳转有两种方式，通过Link组件或者useRouter\"\n      }), \"\\n\", _jsx(_components.pre, {\n        children: _jsx(_components.code, {\n          className: \"language-tsx\",\n          children: \"import Link from 'next/link'\\n\\nconst Post: NextPage = () =\u003e {\\n    ...\\n    return (\\n        \u003cdiv\u003e\\n            \u003cp\u003e{Array.isArray(all) ? all.join('/') : all}\u003c/p\u003e\\n            \u003cLink href=\\\"/blog/123\\\"\u003e\u003ca\u003eblog\u003c/a\u003e\u003c/Link\u003e\\n        \u003c/div\u003e\\n    );\\n}\\n\\n\"\n        })\n      }), \"\\n\", _jsx(_components.h5, {\n        children: \"获取数据\"\n      }), \"\\n\", _jsxs(_components.ol, {\n        children: [\"\\n\", _jsx(_components.li, {\n          children: \"getStaticProps\"\n        }), \"\\n\"]\n      }), \"\\n\", _jsxs(_components.p, {\n        children: [\"使用getStaticProps方法，next.js会在执行\", _jsx(_components.code, {\n          children: \"next-build\"\n        }), \"的时候预渲染页面，并将getStaticProps的返回作为props传给组件。也就是说，在执行完build之后，数据就变成静态的数据了。\"]\n      }), \"\\n\", _jsx(_components.pre, {\n        children: _jsx(_components.code, {\n          className: \"language-tsx\",\n          children: \"export async function getStaticProps(context) {\\n    const res = await fetch(`https://service-go08i9b4-1301241041.gz.apigw.tencentcs.com/products`);\\n    const products = await res.json();\\n\\n    if (!products) {\\n        return {\\n            notFound: true,\\n        }\\n    }\\n\\n    return {\\n        props: { products: products as Products }, // will be passed to the page component as props\\n    }\\n}\\n\"\n        })\n      }), \"\\n\", _jsxs(_components.ol, {\n        start: \"2\",\n        children: [\"\\n\", _jsx(_components.li, {\n          children: \"getServerSideProps\"\n        }), \"\\n\"]\n      }), \"\\n\", _jsx(_components.p, {\n        children: \"使用getServerSideProps方法，next.js会在每一次请求的时候将返回结果作为props传给组件。使用getServerSideProps来获取数据，虽然剧有实时性，但是响应速度将比getStaticProps慢，因为每一次都需要请求新的数据然后计算结果，并且不能在没有额外的配置下被CDN缓存。\"\n      }), \"\\n\", _jsx(_components.pre, {\n        children: _jsx(_components.code, {\n          className: \"language-js\",\n          children: \"function Page({ data }) {\\n  // Render data...\\n}\\n\\n// This gets called on every request\\nexport async function getServerSideProps() {\\n  // Fetch data from external API\\n  const res = await fetch(`https://.../data`)\\n  const data = await res.json()\\n\\n  // Pass data to the page via props\\n  return { props: { data } }\\n}\\n\\nexport default Page\\n\"\n        })\n      }), \"\\n\", _jsx(_components.h5, {\n        children: \"CSS支持\"\n      }), \"\\n\", _jsxs(_components.ol, {\n        children: [\"\\n\", _jsxs(_components.li, {\n          children: [\"\\n\", _jsx(_components.p, {\n            children: \"全局样式\"\n          }), \"\\n\", _jsxs(_components.p, {\n            children: [\"在\", _jsx(_components.code, {\n              children: \"pages/_app.tsx\"\n            }), \"中导入css文件，同样支持从\", _jsx(_components.code, {\n              children: \"node_modules\"\n            }), \"目录导入。\"]\n          }), \"\\n\", _jsx(_components.pre, {\n            children: _jsx(_components.code, {\n              className: \"language-tsx\",\n              children: \"import '../styles/globals.css'\\nimport 'bootstrap/dist/css/bootstrap.css'\\n\"\n            })\n          }), \"\\n\"]\n        }), \"\\n\", _jsxs(_components.li, {\n          children: [\"\\n\", _jsx(_components.p, {\n            children: \"组件样式\"\n          }), \"\\n\", _jsxs(_components.p, {\n            children: [\"Next.js 通过 \", _jsx(_components.code, {\n              children: \"[name].module.css\"\n            }), \" 文件命名约定来支持 \", _jsx(_components.a, {\n              href: \"https://github.com/css-modules/css-modules\",\n              children: \"CSS 模块\"\n            }), \" 。\"]\n          }), \"\\n\", _jsxs(_components.p, {\n            children: [\"例如，假设 \", _jsx(_components.code, {\n              children: \"components/\"\n            }), \" 目录下有一个可重用 \", _jsx(_components.code, {\n              children: \"Button\"\n            }), \" 组件：\"]\n          }), \"\\n\", _jsxs(_components.p, {\n            children: [\"首先，创建 \", _jsx(_components.code, {\n              children: \"components/Button.module.css\"\n            }), \" 文件并填入以下内容：\"]\n          }), \"\\n\", _jsx(_components.pre, {\n            children: _jsx(_components.code, {\n              className: \"language-css\",\n              children: \".error {\\n  color: white;\\n  background-color: red;\\n}\\n\"\n            })\n          }), \"\\n\", _jsxs(_components.p, {\n            children: [\"然后，创建 \", _jsx(_components.code, {\n              children: \"components/Button.js\"\n            }), \" 文件，导入（import）并使用上述 CSS 文件：\"]\n          }), \"\\n\", _jsx(_components.pre, {\n            children: _jsx(_components.code, {\n              className: \"language-js\",\n              children: \"import styles from './Button.module.css'\\n\\nexport function Button() {\\n  return (\\n    \u003cbutton\\n      type=\\\"button\\\"\\n      // Note how the \\\"error\\\" class is accessed as a property on the imported\\n      // `styles` object.\\n      className={styles.error}\\n    \u003e\\n      Destroy\\n    \u003c/button\u003e\\n  )\\n}\\n\"\n            })\n          }), \"\\n\", _jsxs(_components.p, {\n            children: [\"另外，Next.js允许导入（import）具有 \", _jsx(_components.code, {\n              children: \".scss\"\n            }), \" 和 \", _jsx(_components.code, {\n              children: \".sass\"\n            }), \" 扩展名的 Sass 文件，只要确保安装了sass，即可使用。\"]\n          }), \"\\n\"]\n        }), \"\\n\"]\n      }), \"\\n\", _jsx(_components.h5, {\n        children: \"常用组件\"\n      }), \"\\n\", _jsxs(_components.ol, {\n        children: [\"\\n\", _jsxs(_components.li, {\n          children: [\"\\n\", _jsx(_components.p, {\n            children: _jsx(_components.code, {\n              children: \"next/image\"\n            })\n          }), \"\\n\", _jsxs(_components.p, {\n            children: [\"Next.js 的 Image 组件（即 \", _jsx(_components.a, {\n              href: \"https://www.nextjs.cn/docs/api-reference/next/image\",\n              children: _jsx(_components.code, {\n                children: \"next/image\"\n              })\n            }), \"）是对 HTML 的 \", _jsx(_components.code, {\n              children: \"\u003cimg\u003e\"\n            }), \" 元素的扩展，跟进了最新的 web 技术。\"]\n          }), \"\\n\", _jsxs(_components.p, {\n            children: [\"自动图片优化功能（Automatic Image Optimization）能够调整图片尺寸、优化图片并以最新的 \", _jsx(_components.a, {\n              href: \"https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Image_types\",\n              children: \"WebP\"\n            }), \" 格式传输图片（如果浏览器支持 WebP 格式的话）。这样就可以避免将较大的图片传送到视口（viewport）较小的设备上。此功能还允许 Next.js 自动采用未来的图片格式，并将其传输给支持这些格式的浏览器。\"]\n          }), \"\\n\", _jsx(_components.p, {\n            children: \"自动图片优化功能可以支持任何图片来源。即使是托管在外部数据源上（例如，CMS），仍可对图片进行优化。\"\n          }), \"\\n\", _jsx(_components.p, {\n            children: \"Next.js 无需在构建时优化图片，而是根据用户的请求按需优化图片。与静态站点生成器和纯静态解决方案不同，无论发布 10 张还是 1000 万张图片，构建时间都不会增加。\"\n          }), \"\\n\", _jsx(_components.p, {\n            children: \"图片默认是延迟加载的。这意味着你的页面不会因为加载视口（viewport）外的图片而影响页面的加载速度。当图片进入视口（viewport）时才加载。\"\n          }), \"\\n\", _jsxs(_components.p, {\n            children: [\"始终以这种方式渲染图片是为了避免 \", _jsx(_components.a, {\n              href: \"https://web.dev/cls/\",\n              children: \"累计布局偏移（Cumulative Layout Shift）\"\n            }), \"，此 \", _jsx(_components.a, {\n              href: \"https://web.dev/vitals/\",\n              children: \"Core Web Vital\"\n            }), \" 被 Google 作为参数用于 \", _jsx(_components.a, {\n              href: \"https://webmasters.googleblog.com/2020/05/evaluating-page-experience.html\",\n              children: \"搜索排名\"\n            }), \"。\"]\n          }), \"\\n\", _jsx(_components.p, {\n            children: \"使用：\"\n          }), \"\\n\", _jsx(_components.pre, {\n            children: _jsx(_components.code, {\n              className: \"language-jsx\",\n              children: \"import Image from 'next/image'\\n\\nfunction Home() {\\n  return (\\n    \u003c\u003e\\n      \u003ch1\u003eMy Homepage\u003c/h1\u003e\\n      \u003cImage\\n        src=\\\"/me.png\\\"\\n        alt=\\\"Picture of the author\\\"\\n        width={500}\\n        height={500}\\n      /\u003e\\n      \u003cp\u003eWelcome to my homepage!\u003c/p\u003e\\n    \u003c/\u003e\\n  )\\n}\\n\\nexport default Home\\n\"\n            })\n          }), \"\\n\"]\n        }), \"\\n\", _jsxs(_components.li, {\n          children: [\"\\n\", _jsx(_components.p, {\n            children: _jsx(_components.code, {\n              children: \"next/head\"\n            })\n          }), \"\\n\", _jsxs(_components.p, {\n            children: [\"用于将 HTML 标签添加到页面的 \", _jsx(_components.code, {\n              children: \"head\"\n            }), \" 中\"]\n          }), \"\\n\", _jsx(_components.pre, {\n            children: _jsx(_components.code, {\n              className: \"language-js\",\n              children: \"import Head from 'next/head'\\n\\nfunction IndexPage() {\\n  return (\\n    \u003cdiv\u003e\\n      \u003cHead\u003e\\n        \u003ctitle\u003eMy page title\u003c/title\u003e\\n        \u003cmeta name=\\\"viewport\\\" content=\\\"initial-scale=1.0, width=device-width\\\" /\u003e\\n      \u003c/Head\u003e\\n      \u003cp\u003eHello world!\u003c/p\u003e\\n    \u003c/div\u003e\\n  )\\n}\\n\\nexport default IndexPage\\n\"\n            })\n          }), \"\\n\"]\n        }), \"\\n\"]\n      }), \"\\n\", _jsx(_components.h4, {\n        children: \"配置\"\n      }), \"\\n\", _jsx(_components.h5, {\n        children: \"简介\"\n      }), \"\\n\", _jsx(_components.p, {\n        children: \"对于 Next.js 的自定义高级行为，可以在项目目录的根目录（package.json 旁边）创建一个 next.config.js。\"\n      }), \"\\n\", _jsxs(_components.p, {\n        children: [_jsx(_components.code, {\n          children: \"next.config.js\"\n        }), \"是一个Node.js模块，不是一个json文件。\"]\n      }), \"\\n\", _jsx(_components.p, {\n        children: \"定义如下：\"\n      }), \"\\n\", _jsx(_components.pre, {\n        children: _jsx(_components.code, {\n          className: \"language-js\",\n          children: \"module.exports = {\\n  /* config options here */\\n}\\n\"\n        })\n      }), \"\\n\", _jsx(_components.p, {\n        children: \"也可以使用一个函数：\"\n      }), \"\\n\", _jsx(_components.pre, {\n        children: _jsx(_components.code, {\n          className: \"language-js\",\n          children: \"module.exports = (phase, { defaultConfig }) =\u003e {\\n  return {\\n    /* config options here */\\n  }\\n}\\n\"\n        })\n      }), \"\\n\", _jsx(_components.p, {\n        children: \"通过config的类型大概可以知道它支持哪些配置：\"\n      }), \"\\n\", _jsx(_components.pre, {\n        children: _jsx(_components.code, {\n          className: \"language-typescript\",\n          children: \"export declare type NextConfig = {\\n    [key: string]: any;\\n} \u0026 {\\n    i18n?: I18NConfig | null;\\n    eslint?: ESLintConfig;\\n    typescript?: TypeScriptConfig;\\n    headers?: () =\u003e Promise\u003cHeader[]\u003e;\\n    rewrites?: () =\u003e Promise\u003cRewrite[] | {\\n        beforeFiles: Rewrite[];\\n        afterFiles: Rewrite[];\\n        fallback: Rewrite[];\\n    }\u003e;\\n    redirects?: () =\u003e Promise\u003cRedirect[]\u003e;\\n    webpack5?: false;\\n    excludeDefaultMomentLocales?: boolean;\\n    webpack?: ((config: any, context: {\\n        dir: string;\\n        dev: boolean;\\n        isServer: boolean;\\n        buildId: string;\\n        config: NextConfigComplete;\\n        defaultLoaders: {\\n            babel: any;\\n        };\\n        totalPages: number;\\n        webpack: any;\\n    }) =\u003e any) | null;\\n    trailingSlash?: boolean;\\n    env?: {\\n        [key: string]: string;\\n    };\\n    distDir?: string;\\n    cleanDistDir?: boolean;\\n    assetPrefix?: string;\\n    useFileSystemPublicRoutes?: boolean;\\n    generateBuildId?: () =\u003e string | null | Promise\u003cstring | null\u003e;\\n    generateEtags?: boolean;\\n    pageExtensions?: string[];\\n    compress?: boolean;\\n    poweredByHeader?: boolean;\\n    images?: ImageConfig;\\n    devIndicators?: {\\n        buildActivity?: boolean;\\n    };\\n    onDemandEntries?: {\\n        maxInactiveAge?: number;\\n        pagesBufferLength?: number;\\n    };\\n    amp?: {\\n        canonicalBase?: string;\\n    };\\n    basePath?: string;\\n    sassOptions?: {\\n        [key: string]: any;\\n    };\\n    productionBrowserSourceMaps?: boolean;\\n    optimizeFonts?: boolean;\\n    reactStrictMode?: boolean;\\n    publicRuntimeConfig?: {\\n        [key: string]: any;\\n    };\\n    serverRuntimeConfig?: {\\n        [key: string]: any;\\n    };\\n    httpAgentOptions?: {\\n        keepAlive?: boolean;\\n    };\\n    future?: {\\n        /**\\n         * @deprecated this options was moved to the top level\\n         */\\n        webpack5?: false;\\n        strictPostcssConfiguration?: boolean;\\n    };\\n    experimental?: {\\n        swcMinify?: boolean;\\n        swcLoader?: boolean;\\n        cpus?: number;\\n        sharedPool?: boolean;\\n        plugins?: boolean;\\n        profiling?: boolean;\\n        isrFlushToDisk?: boolean;\\n        reactMode?: 'legacy' | 'concurrent' | 'blocking';\\n        workerThreads?: boolean;\\n        pageEnv?: boolean;\\n        optimizeImages?: boolean;\\n        optimizeCss?: boolean;\\n        scrollRestoration?: boolean;\\n        stats?: boolean;\\n        externalDir?: boolean;\\n        conformance?: boolean;\\n        amp?: {\\n            optimizer?: any;\\n            validator?: string;\\n            skipValidation?: boolean;\\n        };\\n        reactRoot?: boolean;\\n        disableOptimizedLoading?: boolean;\\n        gzipSize?: boolean;\\n        craCompat?: boolean;\\n        esmExternals?: boolean | 'loose';\\n        staticPageGenerationTimeout?: number;\\n        isrMemoryCacheSize?: number;\\n        nftTracing?: boolean;\\n        concurrentFeatures?: boolean;\\n    };\\n};\\n\"\n        })\n      }), \"\\n\", _jsx(_components.h4, {\n        children: \"部署\"\n      }), \"\\n\", _jsx(_components.p, {\n        children: \"next的部署主要有三种方式\"\n      }), \"\\n\", _jsx(_components.h5, {\n        children: \"Vercel\"\n      }), \"\\n\", _jsx(_components.p, {\n        children: \"Vercel (之前也叫 Zeit 或 now.sh) 是一家提供静态网站托管的云平台，支持从 Github, GitLab, Bitbucket 等代码仓库中自动拉取代码 然后进行项目打包和部署等功能。但是国内访问速度较慢，在此不多做介绍。\"\n      }), \"\\n\", _jsx(_components.h5, {\n        children: \"Node.js服务\"\n      }), \"\\n\", _jsx(_components.p, {\n        children: \"Next.js 可以部署到任何支持 Node.js 的托管提供商处。\"\n      }), \"\\n\", _jsxs(_components.p, {\n        children: [\"确保你的 \", _jsx(_components.code, {\n          children: \"package.json\"\n        }), \" 文件中设置了 \", _jsx(_components.code, {\n          children: \"\\\"build\\\"\"\n        }), \" 和 \", _jsx(_components.code, {\n          children: \"\\\"start\\\"\"\n        }), \" 脚本：\"]\n      }), \"\\n\", _jsx(_components.pre, {\n        children: _jsx(_components.code, {\n          className: \"language-json\",\n          children: \"{\\n  \\\"scripts\\\": {\\n    \\\"dev\\\": \\\"next\\\",\\n    \\\"build\\\": \\\"next build\\\",\\n    \\\"start\\\": \\\"next start\\\"\\n  }\\n}\\n\"\n        })\n      }), \"\\n\", _jsx(_components.h5, {\n        children: \"Docker Image\"\n      }), \"\\n\", _jsx(_components.p, {\n        children: \"打成镜像，可以部署到docker容器里，也可以部署到容器编排器里（kubernetes或者HashiCorp Nomad）。\"\n      }), \"\\n\", _jsx(_components.p, {\n        children: \"Dockerfile文件参考：\"\n      }), \"\\n\", _jsx(_components.pre, {\n        children: _jsx(_components.code, {\n          className: \"language-dockerfile\",\n          children: \"# Install dependencies only when needed\\nFROM node:alpine AS deps\\n# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.\\nRUN apk add --no-cache libc6-compat\\nWORKDIR /app\\nCOPY package.json yarn.lock ./\\nRUN yarn install --frozen-lockfile\\n\\n# Rebuild the source code only when needed\\nFROM node:alpine AS builder\\nWORKDIR /app\\nCOPY . .\\nCOPY --from=deps /app/node_modules ./node_modules\\nRUN yarn build \u0026\u0026 yarn install --production --ignore-scripts --prefer-offline\\n\\n# Production image, copy all the files and run next\\nFROM node:alpine AS runner\\nWORKDIR /app\\n\\nENV NODE_ENV production\\n\\nRUN addgroup -g 1001 -S nodejs\\nRUN adduser -S nextjs -u 1001\\n\\n# You only need to copy next.config.js if you are NOT using the default configuration\\n# COPY --from=builder /app/next.config.js ./\\nCOPY --from=builder /app/public ./public\\nCOPY --from=builder --chown=nextjs:nodejs /app/.next ./.next\\nCOPY --from=builder /app/node_modules ./node_modules\\nCOPY --from=builder /app/package.json ./package.json\\n\\nUSER nextjs\\n\\nEXPOSE 3000\\n\\n# Next.js collects completely anonymous telemetry data about general usage.\\n# Learn more here: https://nextjs.org/telemetry\\n# Uncomment the following line in case you want to disable telemetry.\\n# ENV NEXT_TELEMETRY_DISABLED 1\\n\\nCMD [\\\"yarn\\\", \\\"start\\\"]\\n\"\n        })\n      }), \"\\n\", _jsx(_components.h5, {\n        children: \"导出静态文件\"\n      }), \"\\n\", _jsxs(_components.p, {\n        children: [\"执行\", _jsx(_components.code, {\n          children: \"next build\"\n        }), \" 和 \", _jsx(_components.code, {\n          children: \"next export\"\n        })]\n      }), \"\\n\", _jsx(_components.p, {\n        children: \"符合以下任何一项，将不允许使用静态导出：\"\n      }), \"\\n\", _jsxs(_components.ul, {\n        children: [\"\\n\", _jsxs(_components.li, {\n          children: [\"使用\", _jsx(_components.code, {\n            children: \"getStaticPaths\"\n          }), \"的\", _jsx(_components.code, {\n            children: \"fallback: true\"\n          }), \"模式\"]\n        }), \"\\n\", _jsxs(_components.li, {\n          children: [\"使用了\", _jsx(_components.code, {\n            children: \"next/Image\"\n          }), \"组件，并且使用默认\"]\n        }), \"\\n\", _jsxs(_components.li, {\n          children: [\"使用了\", _jsx(_components.code, {\n            children: \"getServerSideProps\"\n          }), \"来获取数据\"]\n        }), \"\\n\", _jsx(_components.li, {\n          children: \"使用国际化路由\"\n        }), \"\\n\", _jsx(_components.li, {\n          children: \"使用API路由\"\n        }), \"\\n\"]\n      })]\n    });\n  }\n}\nreturn {\n  default: MDXContent\n};\n","frontmatter":{},"scope":{"title":"Next.js 基本使用","date":"2021-09-09 20:23:00","description":"Next.js 从搭建到部署"}},"frontMatter":{"title":"Next.js 基本使用","date":"2021-09-09 20:23:00","description":"Next.js 从搭建到部署"}},"__N_SSG":true},"page":"/posts/[slug]","query":{"slug":"next"},"buildId":"RWNpKI3MrqdkS-sbWptIf","isFallback":false,"gsp":true,"scriptLoader":[]}</script></body></html>

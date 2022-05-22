@@ -1,0 +1,140 @@
+<!DOCTYPE html><html><head><meta charSet="utf-8"/><title>蛋黄派碎冰冰</title><meta name="description" content="蛋黄派碎冰冰的博客"/><link rel="icon" href="/favicon.ico"/><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"/><meta name="next-head-count" content="5"/><link rel="preload" href="/_next/static/css/3a5f4cd9f9646978.css" as="style"/><link rel="stylesheet" href="/_next/static/css/3a5f4cd9f9646978.css" data-n-g=""/><link rel="preload" href="/_next/static/css/4a0c5542377ce400.css" as="style"/><link rel="stylesheet" href="/_next/static/css/4a0c5542377ce400.css" data-n-p=""/><noscript data-n-css=""></noscript><script defer="" nomodule="" src="/_next/static/chunks/polyfills-5cd94c89d3acac5f.js"></script><script src="/_next/static/chunks/webpack-08ceaf99f165f2e5.js" defer=""></script><script src="/_next/static/chunks/framework-5f4595e5518b5600.js" defer=""></script><script src="/_next/static/chunks/main-e267bb9839e5051c.js" defer=""></script><script src="/_next/static/chunks/pages/_app-fe85ddc63867fc19.js" defer=""></script><script src="/_next/static/chunks/347-34557e8e6f4e11a0.js" defer=""></script><script src="/_next/static/chunks/384-64a86c1d997b1133.js" defer=""></script><script src="/_next/static/chunks/pages/posts/%5Bslug%5D-f0dcdd5740dfb8c2.js" defer=""></script><script src="/_next/static/RWNpKI3MrqdkS-sbWptIf/_buildManifest.js" defer=""></script><script src="/_next/static/RWNpKI3MrqdkS-sbWptIf/_ssgManifest.js" defer=""></script><script src="/_next/static/RWNpKI3MrqdkS-sbWptIf/_middlewareManifest.js" defer=""></script></head><body><div id="__next" data-reactroot=""><div class="Layout_container__CSAqU"><header class="Header_header__Z4YN5"><a href="/">蛋黄派碎冰冰</a><nav><ul><li><a href="/#posts">文章</a></li><li><a href="/about">关于</a></li></ul></nav></header><main><div class="Layout_banner__0qsJd"><h1>TypeScript 装饰器使用</h1><p>TypeScript 装饰器使用</p></div><div class="content-container"><h1>TypeScript 装饰器使用</h1>
+<blockquote>
+<p>装饰器模式，又名装饰者模式。它的定义是“在不改变原对象的基础上，通过对其进行包装拓展，使原有对象可以满足用户的更复杂需求”。</p>
+</blockquote>
+<p>根据装饰对象分类常见的装饰器有三种，类装饰器、属性装饰器和函数装饰器。</p>
+<h2>使用装饰器工厂生成装饰器</h2>
+<p>定义一个装饰器工厂格式大概如下：</p>
+<p>其实就是定义一个函数，该函数返回一个另一个函数，对装饰对象进行处理之后将结果返回。</p>
+<pre><div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span class="hljs-function" style="color:#b48ead">function</span><span class="hljs-function"> </span><span class="hljs-function" style="color:#8fa1b3">name</span><span class="hljs-function"> (</span><span class="hljs-function">) </span><span>{
+</span><span>    </span><span style="color:#b48ead">return</span><span> </span><span class="hljs-function" style="color:#b48ead">function</span><span class="hljs-function">(</span><span class="hljs-function" style="color:#d08770">target: IConfirmableDirective, propertyKey: string, descriptor: PropertyDescriptor</span><span class="hljs-function">) </span><span>{
+</span><span>            </span><span style="color:#65737e">// TODO 对装饰对象的处理，并返回处理结果</span><span>
+</span>    }
+<!-- -->}
+</code></div></pre>
+<p>第一层函数可以传入装饰器参数</p>
+<pre><div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span class="hljs-function" style="color:#b48ead">function</span><span class="hljs-function"> </span><span class="hljs-function" style="color:#8fa1b3">name</span><span class="hljs-function">(</span><span class="hljs-function" style="color:#d08770">value: string</span><span class="hljs-function">) </span><span>{
+</span><span>    </span><span style="color:#b48ead">return</span><span> </span><span class="hljs-function" style="color:#b48ead">function</span><span class="hljs-function">(</span><span class="hljs-function">) </span><span>{}
+</span>}
+<span></span><span style="color:#65737e">// 即是这么使用</span><span>
+</span><span>@name(</span><span style="color:#a3be8c">&#x27;111&#x27;</span><span>) ...
+</span></code></div></pre>
+<p>第二层函数的参数即是装饰对象的源数据</p>
+<ul>
+<li>target:  装饰类的构造函数</li>
+<li>propertyKey: 属性的key值</li>
+<li>descriptor: 装饰对象的PropertyDescriptor</li>
+</ul>
+<h2>装饰器使用示例</h2>
+<p>删除操作二次确认是日常开发中很常见的场景，正常的实现思路是点击删除按钮时执行一个函数，这个函数的内容包括打开一个确认框，定义好回调函数，等二次确定后执行回调。大致如下：</p>
+<pre><div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span class="hljs-function" style="color:#8fa1b3">delete</span><span class="hljs-function">(</span><span class="hljs-function">)</span><span> {
+</span><span>   </span><span style="color:#d08770">this</span><span>.noticeService.dialog({
+</span>      title,
+<span>      </span><span class="hljs-attr">theme</span><span>: </span><span style="color:#a3be8c">&#x27;error&#x27;</span><span>,
+</span><span>      </span><span class="hljs-attr">body</span><span>: description,
+</span><span>      </span><span class="hljs-attr">callback</span><span>: </span><span class="hljs-function">(</span><span class="hljs-function" style="color:#d08770">ret: boolean</span><span class="hljs-function">) =&gt;</span><span> {
+</span><span>        </span><span style="color:#b48ead">if</span><span> (!ret) {
+</span><span>          </span><span style="color:#b48ead">return</span><span>;
+</span>        }
+<span>        </span><span style="color:#65737e">// 执行删除函数</span><span>
+</span>      },
+<!-- -->    });
+<!-- -->}
+</code></div></pre>
+<p>如果使用装饰器改写，只需要在函数前面加个装饰器，不需要修改函数本身，并且看起来更优雅简洁。调用方式如下：</p>
+<pre><div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span> @deleteConfirm(</span><span style="color:#a3be8c">&#x27;删除应用&#x27;</span><span>, </span><span style="color:#a3be8c">&#x27;确定删除应用？&#x27;</span><span>)
+</span><span> </span><span class="hljs-function" style="color:#8fa1b3">delete</span><span class="hljs-function">(</span><span class="hljs-function">)</span><span> {
+</span><span>     </span><span style="color:#65737e">// 删除操作 </span><span>
+</span> }
+</code></div></pre>
+<p>装饰器实现代码如下：</p>
+<pre><div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span>interface IConfirmableDirective {
+</span><span>  </span><span class="hljs-attr">injector</span><span>: Injector;
+</span><span>  ngOnInit?: </span><span style="color:#d08770">Function</span><span>;
+</span>}
+<span></span><span style="color:#b48ead">export</span><span> </span><span style="color:#b48ead">default</span><span> </span><span class="hljs-function" style="color:#b48ead">function</span><span class="hljs-function"> </span><span class="hljs-function" style="color:#8fa1b3">deleteConfirm</span><span class="hljs-function">(</span><span class="hljs-function" style="color:#d08770">title: string, description: string</span><span class="hljs-function">) </span><span>{
+</span><span>  </span><span style="color:#b48ead">return</span><span> </span><span class="hljs-function" style="color:#b48ead">function</span><span class="hljs-function"> (</span><span class="hljs-function" style="color:#d08770">
+</span><span class="hljs-function" style="color:#d08770">    target: IConfirmableDirective,
+</span><span class="hljs-function" style="color:#d08770">    key: string,
+</span><span class="hljs-function" style="color:#d08770">    descriptor: PropertyDescriptor
+</span><span class="hljs-function" style="color:#d08770">  </span><span class="hljs-function">) </span><span>{
+</span><span>    </span><span style="color:#b48ead">const</span><span> originalMethod = descriptor.value;
+</span><span>    </span><span style="color:#b48ead">const</span><span> originNgOninit = target.ngOnInit;
+</span><span>    </span><span style="color:#b48ead">let</span><span> noticeService: NoticeService;
+</span><span>    target.ngOnInit = </span><span class="hljs-function" style="color:#b48ead">function</span><span class="hljs-function"> (</span><span class="hljs-function" style="color:#d08770">this</span><span class="hljs-function" style="color:#d08770">: IConfirmableDirective</span><span class="hljs-function">) </span><span>{
+</span><span>      originNgOninit &amp;&amp; originNgOninit.apply(</span><span style="color:#d08770">this</span><span>);
+</span><span>      noticeService = </span><span style="color:#d08770">this</span><span>.injector.get(NoticeService);
+</span>    };
+<span>    descriptor.value = </span><span style="color:#b48ead">async</span><span> </span><span class="hljs-function" style="color:#b48ead">function</span><span class="hljs-function"> (</span><span class="hljs-function" style="color:#d08770">...args: any[]</span><span class="hljs-function">) </span><span>{
+</span><span>      </span><span style="color:#b48ead">let</span><span> confirm = </span><span style="color:#b48ead">new</span><span> </span><span style="color:#d08770">Promise</span><span>&lt;boolean&gt;(</span><span class="hljs-function">(</span><span class="hljs-function" style="color:#d08770">resolve</span><span class="hljs-function">) =&gt;</span><span> {
+</span>        noticeService.dialog({
+<!-- -->          title,
+<span>          </span><span class="hljs-attr">theme</span><span>: </span><span style="color:#a3be8c">&#x27;error&#x27;</span><span>,
+</span><span>          </span><span class="hljs-attr">body</span><span>: description,
+</span><span>          </span><span class="hljs-attr">callback</span><span>: </span><span class="hljs-function">(</span><span class="hljs-function" style="color:#d08770">ret: boolean</span><span class="hljs-function">) =&gt;</span><span> {
+</span><span>            </span><span style="color:#b48ead">if</span><span> (!ret) {
+</span><span>              resolve(</span><span style="color:#d08770">false</span><span>);
+</span><span>              </span><span style="color:#b48ead">return</span><span>;
+</span>            }
+<span>            resolve(</span><span style="color:#d08770">true</span><span>);
+</span>          },
+<!-- -->        });
+<!-- -->      });
+<span>      </span><span style="color:#b48ead">let</span><span> res = </span><span style="color:#b48ead">await</span><span> confirm;
+</span><span>      </span><span style="color:#b48ead">if</span><span> (res) {
+</span><span>        </span><span style="color:#b48ead">const</span><span> result = originalMethod.apply(</span><span style="color:#d08770">this</span><span>, args);
+</span><span>        </span><span style="color:#b48ead">return</span><span> result;
+</span>      }
+<!-- -->    };
+<span>    </span><span style="color:#b48ead">return</span><span> descriptor;
+</span>  };
+<!-- -->}
+</code></div></pre>
+<h2>Ng-Zorro中的装饰器</h2>
+<p>上面我们简单实现了一个装饰器工厂，但是有很多代码是每次定义装饰器的时候都要重复写的。在Ng-Zorro中，就被提取为一个公共函数，避免了很多重复的代码，并且避免了装饰器命名重复。</p>
+<pre><div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span class="hljs-function" style="color:#b48ead">function</span><span class="hljs-function"> </span><span class="hljs-function" style="color:#8fa1b3">propDecoratorFactory</span><span class="hljs-function">&lt;</span><span class="hljs-function" style="color:#8fa1b3">T</span><span class="hljs-function">, </span><span class="hljs-function" style="color:#8fa1b3">D</span><span class="hljs-function">&gt;(</span><span class="hljs-function" style="color:#d08770">
+</span><span class="hljs-function" style="color:#d08770">  name: string,
+</span><span class="hljs-function" style="color:#d08770">  fallback: (v: T) =&gt; D
+</span><span class="hljs-function" style="color:#d08770"></span><span class="hljs-function">): (</span><span class="hljs-function" style="color:#d08770">target: NzSafeAny, propName: string</span><span class="hljs-function">) =&gt; </span><span class="hljs-function" style="color:#8fa1b3">void</span><span class="hljs-function"> </span><span>{
+</span><span>  </span><span class="hljs-function" style="color:#b48ead">function</span><span class="hljs-function"> </span><span class="hljs-function" style="color:#8fa1b3">propDecorator</span><span class="hljs-function">(</span><span class="hljs-function" style="color:#d08770">
+</span><span class="hljs-function" style="color:#d08770">    target: NzSafeAny,
+</span><span class="hljs-function" style="color:#d08770">    propName: string,
+</span><span class="hljs-function" style="color:#d08770">    originalDescriptor?: TypedPropertyDescriptor&lt;NzSafeAny&gt;
+</span><span class="hljs-function" style="color:#d08770">  </span><span class="hljs-function">): </span><span class="hljs-function" style="color:#8fa1b3">NzSafeAny</span><span class="hljs-function"> </span><span>{
+</span><span>    </span><span style="color:#b48ead">const</span><span> privatePropName = </span><span style="color:#a3be8c">`$$__zorroPropDecorator__</span><span class="hljs-subst" style="color:#a3be8c">${propName}</span><span style="color:#a3be8c">`</span><span>;
+</span><span>    </span><span style="color:#b48ead">if</span><span> (</span><span style="color:#d08770">Object</span><span>.prototype.hasOwnProperty.call(target, privatePropName)) {
+</span><span>      warn(</span><span style="color:#a3be8c">`The prop &quot;</span><span class="hljs-subst" style="color:#a3be8c">${privatePropName}</span><span style="color:#a3be8c">&quot; is already exist, it will be overrided by </span><span class="hljs-subst" style="color:#a3be8c">${name}</span><span style="color:#a3be8c"> decorator.`</span><span>);
+</span>    }
+<span>    </span><span style="color:#d08770">Object</span><span>.defineProperty(target, privatePropName, {
+</span><span>      </span><span class="hljs-attr">configurable</span><span>: </span><span style="color:#d08770">true</span><span>,
+</span><span>      </span><span class="hljs-attr">writable</span><span>: </span><span style="color:#d08770">true</span><span>
+</span>    });
+<span>    </span><span style="color:#b48ead">return</span><span> {
+</span>      get(): string {
+<span>        </span><span style="color:#b48ead">return</span><span> originalDescriptor &amp;&amp; originalDescriptor.get
+</span><span>          ? originalDescriptor.get.bind(</span><span style="color:#d08770">this</span><span>)()
+</span><span>          : </span><span style="color:#d08770">this</span><span>[privatePropName];
+</span>      },
+<span>      set(value: T): </span><span style="color:#b48ead">void</span><span> {
+</span><span>        </span><span style="color:#b48ead">if</span><span> (originalDescriptor &amp;&amp; originalDescriptor.set) {
+</span><span>          originalDescriptor.set.bind(</span><span style="color:#d08770">this</span><span>)(fallback(value));
+</span>        }
+<span>        </span><span style="color:#d08770">this</span><span>[privatePropName] = fallback(value);
+</span>      }
+<!-- -->    };
+<!-- -->  }
+<span>  </span><span style="color:#b48ead">return</span><span> propDecorator;
+</span>}
+</code></div></pre>
+<p>这样，声明一个装饰器会变得更简洁：</p>
+<pre><div style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="language-javascript" style="white-space:pre"><span style="color:#b48ead">export</span><span> </span><span class="hljs-function" style="color:#b48ead">function</span><span class="hljs-function"> </span><span class="hljs-function" style="color:#8fa1b3">InputBoolean</span><span class="hljs-function">(</span><span class="hljs-function">): </span><span class="hljs-function" style="color:#8fa1b3">NzSafeAny</span><span class="hljs-function"> </span><span>{
+</span><span>  </span><span style="color:#b48ead">return</span><span> propDecoratorFactory(</span><span style="color:#a3be8c">&#x27;InputBoolean&#x27;</span><span>, toBoolean);
+</span>}
+</code></div></pre>
+<h2>常见的业务场景</h2>
+<ul>
+<li>实现React高阶组件。</li>
+<li>对属性进行格式转换，通常格式化数据我们会使用定义函数的方式对数据修改然后返回，也可以尝试使用装饰器，让代码更优雅一些。</li>
+<li>对函数执行之前进行拦截，例如上面的删除确认拦截。</li>
+<li>对类功能的扩展，在不改变源代码的情况下对功能扩展，使代码更具维护性。</li>
+</ul></div></main><footer></footer></div></div><script id="__NEXT_DATA__" type="application/json">{"props":{"pageProps":{"source":{"compiledSource":"/*@jsxRuntime automatic @jsxImportSource react*/\nconst {Fragment: _Fragment, jsx: _jsx, jsxs: _jsxs} = arguments[0];\nconst {useMDXComponents: _provideComponents} = arguments[0];\nfunction MDXContent(props = {}) {\n  const {wrapper: MDXLayout} = Object.assign({}, _provideComponents(), props.components);\n  return MDXLayout ? _jsx(MDXLayout, Object.assign({}, props, {\n    children: _jsx(_createMdxContent, {})\n  })) : _createMdxContent();\n  function _createMdxContent() {\n    const _components = Object.assign({\n      h1: \"h1\",\n      blockquote: \"blockquote\",\n      p: \"p\",\n      h2: \"h2\",\n      pre: \"pre\",\n      code: \"code\",\n      ul: \"ul\",\n      li: \"li\"\n    }, _provideComponents(), props.components);\n    return _jsxs(_Fragment, {\n      children: [_jsx(_components.h1, {\n        children: \"TypeScript 装饰器使用\"\n      }), \"\\n\", _jsxs(_components.blockquote, {\n        children: [\"\\n\", _jsx(_components.p, {\n          children: \"装饰器模式，又名装饰者模式。它的定义是“在不改变原对象的基础上，通过对其进行包装拓展，使原有对象可以满足用户的更复杂需求”。\"\n        }), \"\\n\"]\n      }), \"\\n\", _jsx(_components.p, {\n        children: \"根据装饰对象分类常见的装饰器有三种，类装饰器、属性装饰器和函数装饰器。\"\n      }), \"\\n\", _jsx(_components.h2, {\n        children: \"使用装饰器工厂生成装饰器\"\n      }), \"\\n\", _jsx(_components.p, {\n        children: \"定义一个装饰器工厂格式大概如下：\"\n      }), \"\\n\", _jsx(_components.p, {\n        children: \"其实就是定义一个函数，该函数返回一个另一个函数，对装饰对象进行处理之后将结果返回。\"\n      }), \"\\n\", _jsx(_components.pre, {\n        children: _jsx(_components.code, {\n          children: \"function name () {\\n    return function(target: IConfirmableDirective, propertyKey: string, descriptor: PropertyDescriptor) {\\n            // TODO 对装饰对象的处理，并返回处理结果\\n    }\\n}\\n\"\n        })\n      }), \"\\n\", _jsx(_components.p, {\n        children: \"第一层函数可以传入装饰器参数\"\n      }), \"\\n\", _jsx(_components.pre, {\n        children: _jsx(_components.code, {\n          children: \"function name(value: string) {\\n    return function() {}\\n}\\n// 即是这么使用\\n@name('111') ...\\n\"\n        })\n      }), \"\\n\", _jsx(_components.p, {\n        children: \"第二层函数的参数即是装饰对象的源数据\"\n      }), \"\\n\", _jsxs(_components.ul, {\n        children: [\"\\n\", _jsx(_components.li, {\n          children: \"target:  装饰类的构造函数\"\n        }), \"\\n\", _jsx(_components.li, {\n          children: \"propertyKey: 属性的key值\"\n        }), \"\\n\", _jsx(_components.li, {\n          children: \"descriptor: 装饰对象的PropertyDescriptor\"\n        }), \"\\n\"]\n      }), \"\\n\", _jsx(_components.h2, {\n        children: \"装饰器使用示例\"\n      }), \"\\n\", _jsx(_components.p, {\n        children: \"删除操作二次确认是日常开发中很常见的场景，正常的实现思路是点击删除按钮时执行一个函数，这个函数的内容包括打开一个确认框，定义好回调函数，等二次确定后执行回调。大致如下：\"\n      }), \"\\n\", _jsx(_components.pre, {\n        children: _jsx(_components.code, {\n          children: \"delete() {\\n   this.noticeService.dialog({\\n      title,\\n      theme: 'error',\\n      body: description,\\n      callback: (ret: boolean) =\u003e {\\n        if (!ret) {\\n          return;\\n        }\\n        // 执行删除函数\\n      },\\n    });\\n}\\n\"\n        })\n      }), \"\\n\", _jsx(_components.p, {\n        children: \"如果使用装饰器改写，只需要在函数前面加个装饰器，不需要修改函数本身，并且看起来更优雅简洁。调用方式如下：\"\n      }), \"\\n\", _jsx(_components.pre, {\n        children: _jsx(_components.code, {\n          children: \" @deleteConfirm('删除应用', '确定删除应用？')\\n delete() {\\n     // 删除操作 \\n }\\n\"\n        })\n      }), \"\\n\", _jsx(_components.p, {\n        children: \"装饰器实现代码如下：\"\n      }), \"\\n\", _jsx(_components.pre, {\n        children: _jsx(_components.code, {\n          children: \"interface IConfirmableDirective {\\n  injector: Injector;\\n  ngOnInit?: Function;\\n}\\nexport default function deleteConfirm(title: string, description: string) {\\n  return function (\\n    target: IConfirmableDirective,\\n    key: string,\\n    descriptor: PropertyDescriptor\\n  ) {\\n    const originalMethod = descriptor.value;\\n    const originNgOninit = target.ngOnInit;\\n    let noticeService: NoticeService;\\n    target.ngOnInit = function (this: IConfirmableDirective) {\\n      originNgOninit \u0026\u0026 originNgOninit.apply(this);\\n      noticeService = this.injector.get(NoticeService);\\n    };\\n    descriptor.value = async function (...args: any[]) {\\n      let confirm = new Promise\u003cboolean\u003e((resolve) =\u003e {\\n        noticeService.dialog({\\n          title,\\n          theme: 'error',\\n          body: description,\\n          callback: (ret: boolean) =\u003e {\\n            if (!ret) {\\n              resolve(false);\\n              return;\\n            }\\n            resolve(true);\\n          },\\n        });\\n      });\\n      let res = await confirm;\\n      if (res) {\\n        const result = originalMethod.apply(this, args);\\n        return result;\\n      }\\n    };\\n    return descriptor;\\n  };\\n}\\n\"\n        })\n      }), \"\\n\", _jsx(_components.h2, {\n        children: \"Ng-Zorro中的装饰器\"\n      }), \"\\n\", _jsx(_components.p, {\n        children: \"上面我们简单实现了一个装饰器工厂，但是有很多代码是每次定义装饰器的时候都要重复写的。在Ng-Zorro中，就被提取为一个公共函数，避免了很多重复的代码，并且避免了装饰器命名重复。\"\n      }), \"\\n\", _jsx(_components.pre, {\n        children: _jsx(_components.code, {\n          children: \"function propDecoratorFactory\u003cT, D\u003e(\\n  name: string,\\n  fallback: (v: T) =\u003e D\\n): (target: NzSafeAny, propName: string) =\u003e void {\\n  function propDecorator(\\n    target: NzSafeAny,\\n    propName: string,\\n    originalDescriptor?: TypedPropertyDescriptor\u003cNzSafeAny\u003e\\n  ): NzSafeAny {\\n    const privatePropName = `$$__zorroPropDecorator__${propName}`;\\n    if (Object.prototype.hasOwnProperty.call(target, privatePropName)) {\\n      warn(`The prop \\\"${privatePropName}\\\" is already exist, it will be overrided by ${name} decorator.`);\\n    }\\n    Object.defineProperty(target, privatePropName, {\\n      configurable: true,\\n      writable: true\\n    });\\n    return {\\n      get(): string {\\n        return originalDescriptor \u0026\u0026 originalDescriptor.get\\n          ? originalDescriptor.get.bind(this)()\\n          : this[privatePropName];\\n      },\\n      set(value: T): void {\\n        if (originalDescriptor \u0026\u0026 originalDescriptor.set) {\\n          originalDescriptor.set.bind(this)(fallback(value));\\n        }\\n        this[privatePropName] = fallback(value);\\n      }\\n    };\\n  }\\n  return propDecorator;\\n}\\n\"\n        })\n      }), \"\\n\", _jsx(_components.p, {\n        children: \"这样，声明一个装饰器会变得更简洁：\"\n      }), \"\\n\", _jsx(_components.pre, {\n        children: _jsx(_components.code, {\n          children: \"export function InputBoolean(): NzSafeAny {\\n  return propDecoratorFactory('InputBoolean', toBoolean);\\n}\\n\"\n        })\n      }), \"\\n\", _jsx(_components.h2, {\n        children: \"常见的业务场景\"\n      }), \"\\n\", _jsxs(_components.ul, {\n        children: [\"\\n\", _jsx(_components.li, {\n          children: \"实现React高阶组件。\"\n        }), \"\\n\", _jsx(_components.li, {\n          children: \"对属性进行格式转换，通常格式化数据我们会使用定义函数的方式对数据修改然后返回，也可以尝试使用装饰器，让代码更优雅一些。\"\n        }), \"\\n\", _jsx(_components.li, {\n          children: \"对函数执行之前进行拦截，例如上面的删除确认拦截。\"\n        }), \"\\n\", _jsx(_components.li, {\n          children: \"对类功能的扩展，在不改变源代码的情况下对功能扩展，使代码更具维护性。\"\n        }), \"\\n\"]\n      })]\n    });\n  }\n}\nreturn {\n  default: MDXContent\n};\n","frontmatter":{},"scope":{"title":"TypeScript 装饰器使用","date":"2021-09-24 19:00:00","description":"TypeScript 装饰器使用"}},"frontMatter":{"title":"TypeScript 装饰器使用","date":"2021-09-24 19:00:00","description":"TypeScript 装饰器使用"}},"__N_SSG":true},"page":"/posts/[slug]","query":{"slug":"typescript-decoration"},"buildId":"RWNpKI3MrqdkS-sbWptIf","isFallback":false,"gsp":true,"scriptLoader":[]}</script></body></html>
