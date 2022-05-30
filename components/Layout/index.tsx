@@ -7,9 +7,15 @@ import styles from "./index.module.css";
 interface LayoutProps {
   title?: string;
   description?: string;
+  time?: string;
 }
 
-const Layout: NextPage<LayoutProps> = ({ children, title, description }) => {
+const Layout: NextPage<LayoutProps> = ({
+  children,
+  title,
+  description,
+  time,
+}) => {
   return (
     <div className={styles.container}>
       <Header />
@@ -17,10 +23,15 @@ const Layout: NextPage<LayoutProps> = ({ children, title, description }) => {
         <div className={styles.banner}>
           <h1>{title}</h1>
           <p>{description}</p>
+          {time && <div>{time}</div>}
         </div>
         {children}
       </main>
-      <footer></footer>
+      <footer className="grid place-items-center pb-4">
+        <a href="https://hmilin.github.io" rel="noopener">
+          😘Github
+        </a>
+      </footer>
     </div>
   );
 };

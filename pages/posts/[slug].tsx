@@ -15,6 +15,7 @@ interface PostsPageProps {
   frontMatter: {
     title: string;
     description: string;
+    date: string;
   };
 }
 
@@ -25,7 +26,11 @@ const components = {
 
 const PostsPage: NextPage<PostsPageProps> = ({ source, frontMatter }) => {
   return (
-    <Layout title={frontMatter.title} description={frontMatter.description}>
+    <Layout
+      title={frontMatter.title}
+      description={frontMatter.description}
+      time={frontMatter.date}
+    >
       <div className="content-container">
         <MDXRemote {...source} components={components} />
       </div>

@@ -5,6 +5,7 @@
 }
 
 .card {
+	position: relative;
   display: flex;
   height: 200px;
   background-color: #fff;
@@ -42,6 +43,13 @@
 
 .card p {
   color: theme(colors.slate.500);
+}
+
+.card .time {
+	position: absolute;
+	right: 24px;
+	bottom: 16px;
+	color: theme(colors.slate.400);
 }
 
 @media (max-width: 768px) {

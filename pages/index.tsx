@@ -31,6 +31,7 @@ const Home: NextPage<HomeProps> = ({ posts }) => {
                 <h3>{post.title}</h3>
                 <p>{post.description}</p>
               </div>
+              <div className={styles.time}>{post.date}</div>
             </a>
           </Link>
         ))}
@@ -47,10 +48,13 @@ export const getStaticProps = async () => {
     .map((filePath) => {
       const source = fs.readFileSync(path.join(POSTS_PATH, filePath));
 
-      const { data:{date, ...data} } = matter(source);
-      return { ...data, path: filePath.replace(/\.mdx?$/, "") };
+      const {
+        data: { date, ...data },
+      } = matter(source);
+      return { ...data, path: filePath.replace(/\.mdx?$/, ""), date };
     })
-		// .filter((data) => data.public !== false);
+    .filter((data) => data.public !== false)
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   return {
     props: {
