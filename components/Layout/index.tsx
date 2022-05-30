@@ -28,7 +28,11 @@ const Layout: NextPage<LayoutProps> = ({
         {children}
       </main>
       <footer className="grid place-items-center pb-4">
-        <a href="https://hmilin.github.io" rel="noopener">
+        <a
+          href="https://github.com/hmilin"
+          target="_blank"
+          rel="noreferrer noopener"
+        >
           😘Github
         </a>
       </footer>
