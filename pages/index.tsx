@@ -7,6 +7,13 @@ import Layout from "../components/Layout";
 import styles from "../styles/Home.module.css";
 import { postFilePaths, POSTS_PATH } from "../utils/mdxUtils";
 
+type MatterDate = {
+  title: string;
+  description?: string;
+  date: string;
+  public?: boolean;
+};
+
 interface HomeProps {
   posts: {
     title: string;
@@ -48,10 +55,8 @@ export const getStaticProps = async () => {
     .map((filePath) => {
       const source = fs.readFileSync(path.join(POSTS_PATH, filePath));
 
-      const {
-        data: { date, ...data },
-      } = matter(source);
-      return { ...data, path: filePath.replace(/\.mdx?$/, ""), date };
+      const { data } = matter(source) as unknown as { data: MatterDate };
+      return { ...data, path: filePath.replace(/\.mdx?$/, "") };
     })
     .filter((data) => data.public !== false)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
