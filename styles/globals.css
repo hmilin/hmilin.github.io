@@ -31,3 +31,17 @@ body {
     min-width: revert;
   }
 }
+
+.inline-code {
+  color: theme(colors.yellow.500);
+  font-weight: 500;
+  font-variant-ligatures: none;
+}
+
+.inline-code::before {
+  content: "`";
+}
+
+.inline-code::after {
+  content: "`";
+}

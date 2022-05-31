@@ -9,6 +9,7 @@ import { serialize } from "next-mdx-remote/serialize";
 import path from "path";
 import { postFilePaths, POSTS_PATH } from "../../utils/mdxUtils";
 import CodeBlock from "../../components/CodeBlock";
+import Code from "../../components/Code";
 
 interface PostsPageProps {
   source: any;
@@ -22,6 +23,7 @@ interface PostsPageProps {
 const components = {
   Head,
   pre: CodeBlock,
+  code: Code,
 };
 
 const PostsPage: NextPage<PostsPageProps> = ({ source, frontMatter }) => {

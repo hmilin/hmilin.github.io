@@ -3,7 +3,7 @@ import SyntaxHighlighter from "react-syntax-highlighter";
 import { ocean } from "react-syntax-highlighter/dist/cjs/styles/hljs";
 
 const CodeBlock: NextPage<any> = ({ children }) => {
-  if (!children || children.type !== "codeBlock") return null;
+  if (!children || children.type?.name !== "Code") return null;
 
   const {
     props: { className, ...props },
@@ -14,7 +14,6 @@ const CodeBlock: NextPage<any> = ({ children }) => {
   return (
     <SyntaxHighlighter
       language={language}
-      PreTag="div"
       style={ocean}
       {...props}
     />
