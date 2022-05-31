@@ -2,15 +2,18 @@ import type { NextPage } from "next";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import { ocean } from "react-syntax-highlighter/dist/cjs/styles/hljs";
 
-interface CodeProps {
-  className?: string;
-}
+const CodeBlock: NextPage<any> = ({ children }) => {
+  if (!children || children.type !== "codeBlock") return null;
 
-const Code: NextPage<CodeProps> = ({ className, ...props }) => {
-  const match = /language-(\w+)/.exec(className || "");
+  const {
+    props: { className, ...props },
+  } = children;
+
+  const language = className ? className.replace(/language-/, '') : 'javascript';
+
   return (
     <SyntaxHighlighter
-      language={match?.[1] || "javascript"}
+      language={language}
       PreTag="div"
       style={ocean}
       {...props}
@@ -18,4 +21,4 @@ const Code: NextPage<CodeProps> = ({ className, ...props }) => {
   );
 };
 
-export default Code;
+export default CodeBlock;
