@@ -1,0 +1,151 @@
+---
+title: Angular14最大更新--standalone components
+date: "2022-05-30 21:30:01"
+description: Angular14 即将发布，standalone components是其中一大新特性。
+cover: /angular14-preview/cover.svg
+---
+
+# Angular14 新特性
+
+距离`Angular13`发布已经过去五个月了，半年一个大版本又将到来，`Angular`最近发布了 14 的 RC 版本，除了修复社区提出的 bugs，主要还有以下几个特性最值得关注。
+
+## Angular14 新特性预览
+
+- 增强模板编译的检查，在前面的版本`Angular`对模板的变量类型做了完善，但是编译的时候诊断还不够严格，一些致命错误才会报错，这个版本 Angular 增强对模板编译的诊断，帮助开发者提前发现错误。
+
+- 对响应式表单的类型进行严格控制，在表单初始化的时候推断出 value 的类型，获取表单值不再是`any`。
+
+- 第三个就是本文即将重点介绍的，允许`Component`、`Directive`、`Pipe` 独立于模块之外。在这之前，组件、指令或管道都必须在`NgModule`里声明，再通过模块共享给其他模块，这种使用方式比较繁琐，不够灵活。
+
+## standalone components 的使用
+
+`standalone`功能对`Component`、`Directive`和`Pipe`都适用，下面以`Component`为例。
+
+在介绍特性之前，我们可以先创建一个`angular14`的项目感受一下，执行以下命令：
+
+```bash
+ npx -p @angular/cli@14.0.0-rc.2 ng new angular-14-rc
+```
+
+1. 创建一个独立组件
+
+创建一个独立组件`PhotoGalleryComponent`，只需在`Component`参数中加上`standalone: true`，`imports` 参数用来引入另一个独立组件。
+
+```typescript
+@Component({
+  standalone: true,
+  selector: "photo-gallery",
+  imports: [ImageGridComponent],
+  template: ` ... <image-grid [images]="imageList"></image-grid> `,
+})
+export class PhotoGalleryComponent {
+  // component logic
+}
+```
+
+2. 使用独立组件
+
+使用独立组件有两种方式，一种是在已声明`standalone: true`的独立组件中引入，另一种是在模块中引入，在非独立组件中使用。
+
+```typescript
+@Component({
+  standalone: true,
+  selector: "photo-gallery",
+  // an existing module is imported directly into a standalone component
+  imports: [MatButtonModule],
+  template: `
+    ...
+    <button mat-button>Next Page</button>
+  `,
+})
+export class PhotoGalleryComponent {
+  // logic
+}
+```
+
+```typescript
+@NgModule({
+  declarations: [AlbumComponent],
+  exports: [AlbumComponent],
+  imports: [PhotoGalleryComponent],
+})
+export class AlbumModule {}
+```
+
+3. 将独立组件作为应用入口
+
+使用`bootstrapApplication`方法在`main.ts`中将独立组件指定为应用入口，`bootstrapApplication`的第二个参数可以指定`providers`。
+
+```typescript
+bootstrapApplication(PhotoAppComponent, {
+  providers: [
+    {
+      provide: BACKEND_URL,
+      useValue: "https://photoapp.looknongmodules.com/api",
+    },
+    importProvidersFrom(
+      RouterModule.forRoot([
+        /* app routes */
+      ])
+    ),
+    // ...
+  ],
+});
+```
+
+4. 独立组件懒加载
+
+`Route`中新增了一个`loadComponent`字段，用于懒加载独立组件。
+
+```typescript
+import { Routes, RouterModule } from "@angular/router";
+import { NgModule } from "@angular/core";
+
+const routes: Routes = [
+  {
+    path: "gallery",
+    loadComponent: () =>
+      import("./photo-gallery/photo-gallery.component").then(
+        (mod) => mod.PhotoGalleryComponent
+      ),
+  },
+];
+
+@NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule],
+})
+export class AppRoutingModule {}
+```
+
+值得一提的是，本个版本开始，可以在`Route`中声明对某些子路由指定`providers`。
+
+```typescript
+export const ROUTES: Route[] = [
+  {
+    path: 'admin',
+    providers: [
+      AdminService,
+      {provide: ADMIN_API_KEY, useValue: '12345'},
+    ],
+    children: [
+      path: 'users', component: AdminUsersComponent,
+      path: 'teams', component: AdminTeamsComponent,
+    ],
+  },
+  // ... other application routes that don't
+  //     have access to ADMIN_API_KEY or AdminService.
+];
+```
+
+5. 在模块中导出
+
+独立组件、指令、管道可以在被导入的模块中导出，在一些`Angular`插件中，可能需要发布一组有联系的独立指令。
+
+```typescript
+@NgModule({
+  imports: [ImageCarouselComponent, ImageSlideComponent],
+  exports: [ImageCarouselComponent, ImageSlideComponent],
+})
+export class CarouselModule {}
+```
