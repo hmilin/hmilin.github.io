@@ -8,7 +8,7 @@ import { MDXRemote } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import path from "path";
 import { postFilePaths, POSTS_PATH } from "../../utils/mdxUtils";
-import Code from "../../components/Code";
+import CodeBlock from "../../components/CodeBlock";
 
 interface PostsPageProps {
   source: any;
@@ -21,7 +21,7 @@ interface PostsPageProps {
 
 const components = {
   Head,
-  code: Code,
+  pre: CodeBlock,
 };
 
 const PostsPage: NextPage<PostsPageProps> = ({ source, frontMatter }) => {
