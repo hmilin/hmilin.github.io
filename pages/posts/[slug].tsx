@@ -9,6 +9,7 @@ import { serialize } from "next-mdx-remote/serialize";
 import path from "path";
 import { postFilePaths, POSTS_PATH } from "../../utils/mdxUtils";
 import CodeBlock from "../../components/CodeBlock";
+import remarkGfm from "remark-gfm";
 
 interface PostsPageProps {
   source: any;
@@ -59,7 +60,7 @@ export const getStaticProps = async ({ params }: { params: Params }) => {
   const mdxSource = await serialize(content, {
     // Optionally pass remark/rehype plugins
     mdxOptions: {
-      remarkPlugins: [],
+      remarkPlugins: [remarkGfm],
       rehypePlugins: [],
     },
     scope: data,
