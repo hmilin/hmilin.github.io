@@ -3,12 +3,6 @@ import SyntaxHighlighter from "react-syntax-highlighter";
 import { ocean } from "react-syntax-highlighter/dist/cjs/styles/hljs";
 
 const CodeBlock: NextPage<any> = ({ children }) => {
-  if (
-    !children ||
-    !(children.type?.name === "Code" || children.type === "code")
-  )
-    return children;
-
   const {
     props: { className, ...props },
   } = children;
