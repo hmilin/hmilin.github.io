@@ -1,47 +1,392 @@
 ---
 title: 微前端框架qiankun实践
-description: 使用qiankun合并react和angular项目，已上线！
-public: false
+description: 基于qiankun实现Angular向React的渐进式重构
+public: true
+date: "2022-09-09 12:00:03"
+cover: /posts-img/qiankun-logo.png
 ---
 
+# 微前端框架 qiankun 实践
 
-# 微前端框架qiankun实践
+最近把一个年代较久的`Angular`应用重构成`React`，分了五六个迭代一步步重写，终于全部完成替换。用这篇博客记录一下碰到的问题。
 
 ## 为什么需要微前端框架?
 
 ### 融合不同前端技术栈的项目
 
-现如今前端框架主要有Angular、React和Vue，每个框架都有很多周边工具，我碰到的主要有两种场景需要在一个应用中使用不同技术栈：
+现如今前端框架主要有`Angular`、`React`和 `Vue`，每个框架都有很多周边工具，我碰到的主要有两种场景需要在一个应用中使用不同技术栈：
 
 一是技术栈转型，由于种种原因要从一个技术栈转换到另一个技术栈，但是又没办法全部代码一次性重构，微前端是一种非常好的实施渐进式重构的手段和策略。
 
 二是工具使用依赖于技术栈，假如你想引入一个表单生成引擎或图可视化工具，但这些工具依赖于另一个技术栈，在当前使用的技术栈生态中没有更好的产品替代，这种时候也可以考虑另起一个微项目来实现这一模块的功能。
 
-
 ### 解决单体项目的不可维护性
 
 > 微前端架构旨在解决单体应用在一个相对长的时间跨度下，由于参与的人员、团队的增多、变迁，从一个普通应用演变成一个巨石应用(Frontend Monolith)后，随之而来的应用不可维护的问题。这类问题在企业级 Web 应用中尤其常见。
 
-qiankun可以将一个业务复杂的项目分为多个子应用，每个子应用独立开发独立部署，部署完成后主应用自动完成同步更新。
+qiankun 可以将一个业务复杂的项目分为多个子应用，每个子应用独立开发独立部署，部署完成后主应用自动完成同步更新。
 
 ## 实践背景
 
-以下我要使用qiankun融合Angular项目和React项目。Angular项目使用的是Angular9版本，是个比较旧的项目，业务比较多，代码中全局样式较多且比较混乱。React项目是基于Umi框架构建的。
+本次使用 qiankun 目的是将`Angular` 的项目转成 React。Angular 项目使用的是`Angular@9.x`，是个比较旧的项目，业务比较多，代码中全局样式较多且比较混乱。React 项目是基于 Umi 框架构建的。
+
+## 微前端的工作原理
+
+1. 子应用导出生命周期供主应用调用。
+2. 提供子应用主应用通信方式。
+3. JS 沙箱模式，隔绝应用。
+4. CSS 隔离方案。
 
 ## 主应用和子应用选取
 
-将新旧两个项目作为子应用，再使用create-react-app搭建一个项目作为主应用。
+由于`React`项目是最终目标，因此直接将 React 项目作为主应用，`Angular`项目改造为子应用，再按模块来重构，逐步替换。
 
-主应用主要功能：
+## React 主应用配置
 
-- 分配子应用路由，渲染子应用
+由于 React 项目是使用了`Umi`，`Umi`自身提供了`qiankun`的插件`@umijs/plugin-qiankun`，开启`qiankun`只需要少量的配置。
 
-- 配置本地代理，确保子应用中的接口能正常访问
+配置步骤如下：
 
-- 存储共享数据
+1. 安装插件`@umijs/plugin-qiankun`
 
-碰到的坑：
+2. 在`config.ts`中配置子应用
 
-- 开发时自动刷新
+```typescript
+qiankun: {
+	master: {
+		apps: [
+			{
+				name: 'angular9',
+				entry: 'http://localhost:8001', // 入口
+				// 可放一些静态的参数传给子应用
+				props: {
+					testProp1: 'test1',
+				},
+			},
+		],
+		prefetch: 'all',
+		sandbox: {
+			strictStyleIsolation: false,
+			experimentalStyleIsolation: true,
+		},
+	},
+},
+```
 
-- 静态资源访问
+3. 给子应用分配路由
+
+```typescript
+routes: [
+	{
+		path: '/',
+		component: '@/layouts',
+		routes: [
+			// other
+			{
+				path: 'v1',
+				microApp: 'angular9', // 上面的子应用的名字
+				microAppProps: {
+					autoSetLoading: false, // 是否开启loading动画
+					className: 'appClassName',
+					wrapperClassName: 'wrapperClass',
+				},
+			},
+			// other
+		],
+	},
+],
+```
+
+这里使用的是路由绑定的方式，`@umijs/plugin-qiankun`还提供了组件`<MicroApp />`来引入子应用，组件引入的方式适合不带路由的子应用。
+
+4. 引入`Zone.js`
+
+`Angular`的脏数据检测依赖`Zone.js`，当一个页面上存在多个`Zone`实例时，`Zone.js`会抛出错误。因此为确保页面上只运行一个`Zone`实例，统一在主应用引入`Zone.js`。
+
+## Angular 子应用配置
+
+注：`qiankun`官方文档中的`Angular`子应用配置是旧版本，最新版本的应参考 github 仓库https://github.com/umijs/qiankun/tree/master/examples/angular9。
+
+1. 安装需要的插件
+
+```shell
+yarn add -D @angular-builders/custom-webpack
+yarn add single-spa single-spa-angular
+```
+
+- `Angular`是使用`Webpack`构建，常规的配置在`angular.json`指定，使用`@angular-builders/custom-webpack`可以扩展其他`Webpack`配置。
+
+- `single-spa-angular`是`single-spa`官方提供的，使用它可以快速的配置生命周期的导出和`Webpack`配置。
+
+2. 在`main.ts`中配置入口加载和生命周期导出
+
+```typescript
++ import { singleSpaAngular, getSingleSpaExtraProviders } from 'single-spa-angular';
++ import { singleSpaPropsSubject } from './single-spa/single-spa-props';
+
+// 只在非qiankun子应用环境下执行
++	if (!(window as any).__POWERED_BY_QIANKUN__) {
+		platformBrowserDynamic()
+			.bootstrapModule(AppModule)
+			.catch(err => console.error(err));
++	}
+
++ const { bootstrap, mount, unmount } = singleSpaAngular({
++   bootstrapFunction: singleSpaProps => {
++	 	// 主应用向子应用传参
++     singleSpaPropsSubject.next(singleSpaProps);
++     return platformBrowserDynamic(getSingleSpaExtraProviders()).bootstrapModule(AppModule);
++   },
++   template: '<app-root />',
++   Router,
++   NgZone: NgZone,
++ });
+```
+
+3. 配置路由 base，修改`app-routing.module.ts`
+
+```typescript
+@NgModule({
+  ...
+  providers: [
+    {
+      provide: APP_BASE_HREF,
+      useValue: (window as any).__POWERED_BY_QIANKUN__ ? '/v1' : '/',
+    },
+  ],
+})
+```
+
+4. 注释掉`zone.js`的引入
+
+注释掉`polyfills.ts`中的`zone.js`引入
+
+```js
+// import 'zone.js/dist/zone'; // Included with Angular CLI.
+```
+
+在`index.html`中引入，适配子应用单独运行
+
+```typescript
+<head>
+ <script src="https://unpkg.com/zone.js" ignore></script>
+</head>
+```
+
+## 微前端常见问题
+
+### 父子应用间通信
+
+`Umi`对`qiankun`的`initGlobalState`结合`initial-state`插件做了封装，只需在入口简单配置，即可使用`useModel`来跟子应用通信。在`Angular`子应用中即通过`single-spa`插件导出更新的生命周期并获取主应用共享的状态。
+
+1. 主应用配置
+
+修改`app.ts`
+
+```typescript
+// 给路由绑定的微应用传值
+export function useQiankunStateForSlave() {
+  const [masterState, setMasterState] = useState<MasterState>({});
+
+  return {
+    masterState,
+    setMasterState,
+  };
+}
+```
+
+组件中拿值和传值
+
+```typescript
+import { useModel } from 'umi';
+
+const Layout: React.FC<LayoutProps> = ({ children }) => {
+  const { masterState, setMasterState } = useModel('@@qiankunStateForSlave');
+
+  const { data: user } = useRequest(fetchUser);
+
+  useEffect(() => {
+    if (user) {
+      setMasterState({ user });
+    }
+  }, [user]);
+
+	// ...
+}
+```
+
+2. 子应用配置
+
+`main.ts`中导出`update`生命周期
+
+```
+const { bootstrap, mount, unmount, update } = singleSpaAngular({
+  // ...,
+  updateFunction: (singleSpaProps: SingleSpaProps) => {
+    console.log("update singleSpaProps", singleSpaProps);
+    singleSpaPropsSubject.next(singleSpaProps);
+    return Promise.resolve();
+  },
+	// ...
+});
+```
+
+组件中获取
+
+```typescript
+export class AppComponent implements OnInit, OnDestroy {
+	// ...
+	ngOnInit(): void {
+		// 监听主应用共享数据更新
+    singleSpaPropsSubject.pipe(takeUntil(this.destroy)).subscribe((props) => {
+      const { user } = props.masterState ?? {};
+      if (user) {
+        this.authService.user.next(user);
+      }
+    });
+	}
+}
+```
+
+在`single-spa-props.ts`中导出一个方法用于给父组件传值
+
+```typescript
+// 向父组件传值
+export const setMasterState = (state: Partial<MasterState>) => {
+  singleSpaPropsSubject.pipe(take(1)).subscribe((props) => {
+    props.setMasterState({ ...props.masterState, ...state });
+  });
+};
+```
+
+### 样式隔离
+
+`qiankun`提供了两种样式隔离方案，通过配置`sandbox`来开启样式隔离。`strictStyleIsolation`为`true`表示开启`ShadowDom`	的严格样式隔离，这种模式下`qiankun`会为每个微应用的容器包裹上一个`shadow dom`节点。`experimentalStyleIsolation`是`qiankun`提供的一个实验性的样式隔离特性，会给每个子应用的样式多套一层根选择器来达到子应用间样式隔离的效果。
+
+`ShadowDom`方案需要根据不同框架去做改造和适配才能用起来，所以项目中使用了第二种方案。
+
+### 部署配置
+
+在做微前端改造之前，本项目是以`Nginx`作为服务器，因此只需要根据子应用路由的定义，在Nginx上加一个转发规则，转到子应用的文件目录即可。需要注意的是，子应用的入口配置需要和`Nginx`上的路径配置保持一致。
+
+```typescript
+qiankun: {
+    master: {
+      apps: [
+        {
+          name: 'angular9',
+          entry:
+            process.env.NODE_ENV === 'development'
+              ? 'http://localhost:8001'
+              : '/v1/',
+        },
+      ],
+      // ...
+    },
+  },
+```
+
+## 碰到的坑
+
+### antd popover 导致页面崩溃
+
+经过排查是`antd`的基础组件`rc-trigger@5.2.10`的问题，在最近发布的新版本中已经修复了改问题，在修复之前是通过`patches`来修改包的源代码。
+
+```
+diff --git a/node_modules/rc-trigger/es/Popup/PopupInner.js b/node_modules/rc-trigger/es/Popup/PopupInner.js
+index aacf97b..8ebea1b 100644
+--- a/node_modules/rc-trigger/es/Popup/PopupInner.js
++++ b/node_modules/rc-trigger/es/Popup/PopupInner.js
+@@ -82,9 +82,12 @@ var PopupInner = /*#__PURE__*/React.forwardRef(function (props, ref) {
+     if (status === 'align') {
+       // Repeat until not more align needed
+       if (alignedClassName !== nextAlignedClassName) {
+-        Promise.resolve().then(function () {
++        // Promise.resolve().then(function () {
++        //   forceAlign();
++        // });
++        setTimeout(() => {
+           forceAlign();
+-        });
++        }, 0);
+       } else {
+         goNextStatus(function () {
+           var _prepareResolveRef$cu;
+diff --git a/node_modules/rc-trigger/lib/Popup/PopupInner.js b/node_modules/rc-trigger/lib/Popup/PopupInner.js
+index b603854..7daa11b 100644
+--- a/node_modules/rc-trigger/lib/Popup/PopupInner.js
++++ b/node_modules/rc-trigger/lib/Popup/PopupInner.js
+@@ -102,9 +102,12 @@ var PopupInner = /*#__PURE__*/React.forwardRef(function (props, ref) {
+     if (status === 'align') {
+       // Repeat until not more align needed
+       if (alignedClassName !== nextAlignedClassName) {
+-        Promise.resolve().then(function () {
++        // Promise.resolve().then(function () {
++        //   forceAlign();
++        // });
++        setTimeout(() => {
+           forceAlign();
+-        });
++        }, 0);
+       } else {
+         goNextStatus(function () {
+           var _prepareResolveRef$cu;
+```
+
+### Angular 应用卸载后重新挂载
+
+这是在`Umi`下才会触发的问题，直接使用`qiankun`不会触发，大概看了一下源码，`Umi`是通过`qiankun`的`loadMicroApp`来加载子应用的，在执行卸载操作之前，`Angular`应用已经监听到了路由变化，并且不知道由于什么原因在卸载之后又重新渲染了。这个问题一直找不到根本解决方案，暂时用一个临时解决办法解决了。
+
+在`Angular`应用的`App`组件中监听`Location`变化，当路由非本应用基础路径时，调用`router`的`dispose`方法手动销毁路由器。
+```typescript
+ constructor(
+    private location: Location,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
+    this.location.subscribe((change) => {
+      // Angular应用卸载后路由会响应并使应用重新挂载，跳出子应用前先把router销毁
+      if (change.type === "popstate" && !change.url.includes("/v1")) {
+        this.router.dispose();
+      }
+    });
+  }
+```
+
+### 子应用静态文件访问异常
+
+1. 确保子应用使用正确的路径引入图片，由于配置了 base-href 为非`/`，不能使用绝对路径
+
+在html使用
+
+```typescript
+const logo = require("src/assets/dashboard-users.svg").default;
+```
+
+在CSS中使用
+```css
+	background-image: url('~/assets/img/pro.svg');
+```
+
+2. 配置启动命令`ng serve`的参数`--deploy-url`为当前运行的地址如下，且将`ng build`的`--deploy-url`配置为服务器子目录名称。
+
+```
+ng serve ... --deploy-url //localhost:8002/
+```
+
+### 路由回退异常
+
+原因也是` Angular 应用卸载后重新挂载`，解决卸载之后重新挂载的问题即可。
+
+## Demo 地址
+
+[https://github.com/hmilin/umi-qiankun-with-angular](https://github.com/hmilin/umi-qiankun-with-angular)
+
+## 参考文档
+
+single-spa[https://single-spa.js.org/docs]
+
+qiankun[https://qiankun.umijs.org/]
+
+@umijs/plugin-qiankun[https://v3.umijs.org/zh-CN/plugins/plugin-qiankun]
