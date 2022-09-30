@@ -25,6 +25,10 @@ body {
   padding: 24px;
 }
 
+.content-container + .content-container {
+  margin-top: 64px;
+}
+
 @media (max-width: 768px) {
   .content-container {
     width: calc(100% - 48px);

@@ -4,6 +4,7 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import Layout from "../../components/Layout";
+import Comment from "../../components/Comment";
 import { MDXRemote } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import path from "path";
@@ -34,6 +35,9 @@ const PostsPage: NextPage<PostsPageProps> = ({ source, frontMatter }) => {
     >
       <div className="content-container">
         <MDXRemote {...source} components={components} />
+      </div>
+      <div className="content-container">
+        <Comment />
       </div>
     </Layout>
   );
