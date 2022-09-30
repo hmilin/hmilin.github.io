@@ -379,6 +379,55 @@ ng serve ... --deploy-url //localhost:8002/
 
 原因也是` Angular 应用卸载后重新挂载`，解决卸载之后重新挂载的问题即可。
 
+### 使用`experimentalStyleIsolation`设置样式隔离之后，子应用的应用对全局浮层下的元素不起作用
+
+原因是生成的样式选择器全部都是在子应用root元素下生效，子应用的全局浮层默认渲染在body下，因此需要将浮层的默认容器渲染在子应用的root元素下。
+
+在`angular`使用了`ng-zorro`组件库，是使用`angular/cdk`的`overlay`来做浮层管理的，可以这样自定义`overlay`容器：
+
+```typescript
+import { Inject, Injectable, OnDestroy } from "@angular/core";
+import { OverlayContainer } from "@angular/cdk/overlay";
+import { Platform } from "@angular/cdk/platform";
+import { DOCUMENT } from "@angular/common";
+
+@Injectable()
+export class AppOverlayContainer extends OverlayContainer implements OnDestroy {
+  constructor(@Inject(DOCUMENT) document: Document, _platform: Platform) {
+    super(document, _platform);
+  }
+
+  protected _createContainer(): void {
+    super._createContainer();
+    if (!this._containerElement) {
+      return;
+    }
+    const parent = document.querySelector("app-root") || document.body;
+    parent.appendChild(this._containerElement);
+  }
+
+  ngOnDestroy(): void {
+    super.ngOnDestroy();
+    this._containerElement = null;
+  }
+}
+
+```
+
+在`AppModule`下使用依赖
+
+```typescript
+@NgModule({
+  // ...
+  providers: [
+    {
+      provide: OverlayContainer,
+      useClass: AppOverlayContainer,
+    },
+  ],
+})
+```
+
 ## Demo 地址
 
 [https://github.com/hmilin/umi-qiankun-with-angular](https://github.com/hmilin/umi-qiankun-with-angular)
