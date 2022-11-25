@@ -26,7 +26,7 @@ public: false
 ### 前端测试
 
 1. 将UI和功能分离，避免因为渲染复杂的UI拖慢测试速度
-2. 使用不容易改变的属性查询HTML，tag或者专属属性如test-id，而不是css选择器
+2. 使用不容易改变的属性查询HTML，tag或者专属属性如data-testid，而不是css选择器
 3. 有条件下完全渲染组件进行测试，如果其中一个子组件明显拖慢测试(如动画)或使很难配置，可以考虑主动用伪组件替换它
 4. 避免使用sleep，使用库允许的等待操作，如cypress.request('url')，testin-library的wait(expect(element))
 5. 观察内容如何通过网络提供：
