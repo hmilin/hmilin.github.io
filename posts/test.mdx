@@ -1,0 +1,51 @@
+---
+title: 测试学习笔记
+date: "2022-11-25 16:55:43"
+description: 测试理论记录和实践。
+public: false
+---
+
+# 测试学习笔记
+
+
+
+## 理论学习
+
+### 几个原则
+
+1. 使用AAA模式构造测试内容：Arrange(准备)  Act(执行) Assert(断言)
+2. 代码尽量简单，使用通用的断言方法
+3. 只测试公共方法
+4. 正确使用测试替身（主要是理清楚测试目的）
+5. 利用库(如faker.js)造一些真实数据进行测试，可以更早发现问题
+6. 使用快照时，使用短的行内快照
+7. 尽量避免使用全局初始化数据，每个测试中自己初始化需要的数据
+8. 不要catch错误，expect它们
+9. 给测试用例打tag，用于筛选目标用例实行，具体要看测试库如何实现
+
+### 前端测试
+
+1. 将UI和功能分离，避免因为渲染复杂的UI拖慢测试速度
+2. 使用不容易改变的属性查询HTML，tag或者专属属性如test-id，而不是css选择器
+3. 有条件下完全渲染组件进行测试，如果其中一个子组件明显拖慢测试(如动画)或使很难配置，可以考虑主动用伪组件替换它
+4. 避免使用sleep，使用库允许的等待操作，如cypress.request('url')，testin-library的wait(expect(element))
+5. 观察内容如何通过网络提供：
+   1. 使用一些活动监视器，以确保在真实网络下的页面负载是最优的
+   2. 使用前端工具 (如 [lighthouse](https://developers.google.com/web/tools/lighthouse/)、[pagespeed](https://developers.google.com/speed/pagespeed/insights/)) 以进行更全面的分析
+6. 非E2E测试时，避免使用真实后端API，使用替身库代替
+7. 写几个跨越整个系统的E2E测试，1-10个
+8. 通过复用登录凭证提速 E2E 测试
+9. 创建一个E2E冒烟测试，该测试跑一遍所有页面，可以避免因为打包问题有些页面没办法正常渲染
+
+
+
+## 项目实践
+
+
+
+
+
+
+## 参考链接
+
+https://github.com/goldbergyoni/javascript-testing-best-practices

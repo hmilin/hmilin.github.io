@@ -13,7 +13,90 @@ public: false
 
 ## devtools lighthouse 使用
 
-### FCP TBT LCP CLS 
+### FCP LCP TBT TTI CLS FID
+
+FCP LCP TBT TTI CLS FID等是一些衡量用户体验的指标，lighthouse会根据这些指标来打分。
+
+#### FCP
+
+First Contentful Paint, 首次内容绘制，浏览器首次任何渲染文本、图片、视频、canvas或者非空svg，但不包括任何iframe里的内容，是用户第一次开始使用页面内容。
+
+#### LCP
+
+Largest Contentful Paint, 最大内容绘制，反映用户在页面等待了多少时间才看到页面主要内容。
+
+LCP 应在页面首次开始加载后的2.5 秒内发生。
+
+#### TTI
+
+Time to Interactive, 可交互时间，页面从开始加载到主要子资源完成渲染，并能够快速、可靠地响应用户输入所需的时间。
+
+测量步骤：
+1. 先进行First Contentful Paint 首次内容绘制 (FCP)。
+2. 沿时间轴正向搜索时长至少为 5 秒的安静窗口，其中，安静窗口的定义为：没有长任务且不超过两个正在处理的网络 GET 请求。
+3. 沿时间轴反向搜索安静窗口之前的最后一个长任务，如果没有找到长任务，则在 FCP 步骤停止执行。
+4. TTI 是安静窗口之前最后一个长任务的结束时间（如果没有找到长任务，则与 FCP 值相同）。
+
+#### TBT
+
+Total Blocking Time, 总阻塞时间，是FCP和TTI之间的总时间，这期间，主线程被阻塞的时间过长，无法作出输入响应。
+
+为了提供良好的用户体验，网站在普通移动硬件上进行测试时，应该努力将总阻塞时间控制在300毫秒以内。
+
+优化指南：
+- 减少第三方代码的影响
+- 减少 JavaScript 执行时间
+- 最小化主线程工作
+- 保持较低的请求数和较小的传输大小
+
+#### CLS
+
+Cumulative Layout Shift, 累积布局偏移，是测量视觉稳定性的一个以用户为中心的重要指标，因为该项指标有助于量化用户经历意外布局偏移的频率，较低的 CLS 有助于确保一个页面是令人愉悦的。
+
+为了提供良好的用户体验，页面的 CLS 应保持在 0.1. 或更少。
+
+容易发生CLS的几种情况：
+- 异步加载资源，动态添加DOM到页面内容上方
+- 未知尺寸图像或视频
+- 实际渲染后比后备字体更大或更小的字体
+- 动态调整自身大小的第三方广告或小组件
+
+#### FID
+
+First Input Delay, 首次输入延迟，测量交互性。为了提供良好的用户体验，页面的 FID 应为100 毫秒或更短。
+
+在 JavaScript 中测量FID
+
+```javaScript
+new PerformanceObserver((entryList) => {
+  for (const entry of entryList.getEntries()) {
+    const delay = entry.processingStart - entry.startTime;
+    console.log('FID candidate:', delay, entry);
+  }
+}).observe({type: 'first-input', buffered: true});
+```
+
+如何改进FID
+
+- 减少第三方代码的影响
+- 减少 JavaScript 执行时间
+- 最小化主线程工作
+- 保持较低的请求数和较小的传输大小
 
 ## 内存泄漏分析
+
+
+## 参考文章
+
+[CLS](https://web.dev/cls/)
+
+[TTI](https://web.dev/tti/)
+
+[FID](https://web.dev/fid/)
+
+[TBT](https://web.dev/lighthouse-total-blocking-time/)
+
+[Web 指标](https://web.dev/vitals/)
+
+[测量工具库web-vitals](https://github.com/GoogleChrome/web-vitals)
 
