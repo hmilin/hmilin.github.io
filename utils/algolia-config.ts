@@ -1,0 +1,3 @@
+export const ALGOLIA_APP_ID = 'PH3T7UBDIV'
+export const ALGOLIA_SEARCH_API_KEY = '4f75d91c34e56a2865c4159f6c3159c2'
+export const ALGOLIA_INDEX_NAME = 'blog'
