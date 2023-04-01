@@ -16,10 +16,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Set environment variables
-        uses: allenevans/set-env@v2.0.0
-        with:
-        ALGOLIA_SEARCH_ADMIN_KEY: ${{ secrets.ALGOLIA_SEARCH_ADMIN_KEY }}
     - name: Use Node.js 16.x
       uses: actions/setup-node@v3
       with:
@@ -31,6 +27,8 @@ jobs:
       
     - name: Build my App
       run: npm run build && npm run export && touch ./out/.nojekyll && npm run update:postIndex
+      env: 
+        ALGOLIA_SEARCH_ADMIN_KEY: ${{ secrets.ALGOLIA_SEARCH_ADMIN_KEY }}
       
     - name: Deploy
       uses: JamesIves/github-pages-deploy-action@v4.3.3
