@@ -7,13 +7,15 @@ public: false
 
 # 基于 Lighthourse 的性能优化
 
-## 性能分析
+三种测量模式：
 
-### devtools performance 使用
+Navigation：默认值，分析一个页面的加载
+Timespan：分析任意一段时间，包含用户交互
+Spanshot：分析页面当前状态
 
-### devtools memory 使用
+## Performance
 
-### devtools lighthouse 使用
+### METRICS
 
 #### FCP LCP TBT TTI CLS FID
 
@@ -28,6 +30,10 @@ First Contentful Paint, 首次内容绘制，浏览器首次任何渲染文本�
 Largest Contentful Paint, 最大内容绘制，反映用户在页面等待了多少时间才看到页面主要内容。
 
 LCP 应在页面首次开始加载后的 2.5 秒内发生。
+
+考量的元素包括：<img> <svg> <image> <video> css的url()函数  包含文本节点或其他行内级文本元素的块级元素
+
+图片等资源绘制完成或者块级元素的大小由小变大，都计入最大内容渲染
 
 ##### TBT
 
@@ -99,8 +105,6 @@ new PerformanceObserver((entryList) => {
 - 减少 JavaScript 执行时间
 - 最小化主线程工作
 - 保持较低的请求数和较小的传输大小
-
-### 内存泄漏分析
 
 ## 可访问性
 
