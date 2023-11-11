@@ -1,4 +1,5 @@
 .container {
+  pisition: relative;
   min-height: 100vh;
   background-color: #fafafa;
 }
@@ -37,3 +38,9 @@
   }
 }
 
+.search-container {
+  position: absolute;
+  top: 240px;
+  left: 50%;
+  transform: translateX(-50%);
+}
