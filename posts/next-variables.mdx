@@ -1,0 +1,59 @@
+---
+title: Next.js中如何配置代理地址
+description: 介绍Next.js中两种代理方式，以及如何使用运行时环境变量作为代理地址。
+date: "2023-09-13 18:55:00"
+---
+
+# Next.js中如何配置代理地址
+
+在`Next.js 13`中，有两种方式来配置服务端代理地址，这两种方法都适用于`App Router`和`Page Router`两种模式的应用。
+
+## 在`next.config.js`中配置
+
+这种方式是官方文档推荐的常规做法，通过`config`中的`rewrites`字段来重写地址，具体配置如下
+
+```javascript
+rewrites() {
+		return {
+			beforeFiles: [
+				{
+					source: '/api/:path*',
+					destination: `${process.env.SERVER_URL}/api/:path*`
+				}
+			]
+		}
+	},
+```
+
+rewrites函数的返回对象有三个字段 `beforeFiles` `afterFiles` `fallback`，分别代表三个验证重写的时机：  
+- `beforeFiles` 表示重写将在读取有无相应pages和public文件之前执行，因此可以覆盖页面的请求。
+- `afterFiles` 在获取`pages/public`之后，校验动态路由之前执行。
+- `fallback` 在获取`pages/public`和校验动态路由之前执行。
+
+需要注意的是，`rewrites`函数是在执行`next build`的时候执行，如果在配置中使用了环境变量，将会在执行构建操作的时候填入当前指定的`NODE_ENV`对应的环境变量的值。
+
+在实际使用中，我们通常期望一个镜像可以在多个环境中运行，这就需要支持在容器运行时通过环境变量来确定服务代理地址，使用`rewrites`来配置代理将无法支持。
+
+
+## 配置`middleware.ts`文件自定义代理
+
+`middleware`可以拦截`matcher`配置匹配的请求，并可以使用`NextResponse`对请求进行操控。
+
+在和`app`或`pages`目录同层级声明`middleware.(t|j)s`文件:
+```typescript
+import { NextRequest, NextResponse } from 'next/server';
+
+// 代理/api/开头的请求
+export function middleware(request: NextRequest) {
+  return NextResponse.rewrite(
+    new URL(`${process.env.SERVER_URL}${request.nextUrl.pathname}${request.nextUrl.search}`),
+    { request },
+  );
+}
+
+export const config = {
+  matcher: ['/api/:path*'],
+};
+```
+
+通过已上配置，在每一次有`/api/:path`请求的时候，都会进入`middleware`函数，这时候读取的环境变量`process.env.SERVER_URL`就是运行时的环境变量了。
