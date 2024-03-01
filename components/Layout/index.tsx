@@ -1,3 +1,4 @@
+import GlobalSearch from "components/GlobalSearch";
 import type { NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
@@ -8,6 +9,7 @@ interface LayoutProps {
   title?: string;
   description?: string;
   time?: string;
+  search?: boolean;
 }
 
 const Layout: NextPage<LayoutProps> = ({
@@ -15,6 +17,7 @@ const Layout: NextPage<LayoutProps> = ({
   title,
   description,
   time,
+  search = true,
 }) => {
   return (
     <div className={styles.container}>
@@ -27,6 +30,7 @@ const Layout: NextPage<LayoutProps> = ({
         </div>
         {children}
       </main>
+      {search && <GlobalSearch className={styles["search-container"]} />}
       <footer className="grid place-items-center pb-4">
         <a
           href="https://github.com/hmilin"

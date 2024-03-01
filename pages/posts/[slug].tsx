@@ -32,6 +32,7 @@ const PostsPage: NextPage<PostsPageProps> = ({ source, frontMatter }) => {
       title={frontMatter.title}
       description={frontMatter.description}
       time={frontMatter.date}
+      search={false}
     >
       <div className="content-container">
         <MDXRemote {...source} components={components} />
