@@ -1,0 +1,173 @@
+---
+title: 解决浏览器兼容性问题的思路
+date: "2024-02-28 19:00:00"
+description: 如何在开发时及时发现兼容性问题并解决
+---
+
+前端兼容问题主要以语言划分有`JavaScript`和`CSS`两类，其中`JavaScript`分为语法和功能特性，语法的兼容一般通过编译工具来做语法转换，功能特性可以通过引入`Polyfills`来兼容低版本浏览器。
+
+对于不同的新提案，浏览器不同版本的实现先后顺序不一致，可以从[caniuse](https://caniuse.com/)查到数据。
+
+
+## 设定兼容目标
+
+在`package.json`中声明`browserslist`是受大部分工具认可和使用的标准，借助`browserslist`来统一读取兼容标准，并从`caniuse-lite`中读到兼容性数据。
+```
+{
+"browserslist": [
+    "Chrome >=80",
+    "Firefox >=72",
+    "Safari >=13.1",
+    "Edge >=80"
+  ]
+}
+```
+
+
+## 如何在开发时检测兼容性问题
+
+依赖于测试和用户反馈兼容性问题显然是不被允许的，要求开发人员记住所有特性的兼容性显然也不符合实际，所以应该借助插件，在开发过程中及时检测到问题。
+
+### ESLint
+
+使用ESLint的`eslint-plugin-compat`识别出js中的兼容性
+
+安装依赖之后在eslintrc.js中配置
+```
+module.exports = {
+  plugins: ['compat'],
+  extends: ['plugin:compat/recommended'],
+  env: {
+    browser: true,
+  },
+};
+```
+插件会读取package.json中的browserslist
+
+当调用`new PaymentRequest()`的时候，eslint会给出以下提示
+
+![PaymentRequest](/posts-img/eslint-compat-1.png)
+
+
+注意：这个插件的兼容规则没有很完整，像`Promise.any`  `Array.property.at`等方法没有定义检测规则
+
+
+### StyleLint
+
+使用`stylelint-no-unsupported-browser-features`插件
+
+注意：StyleLint 15到16之间有一个重大变更是CommonJS到ESM的迁移，`stylelint-no-unsupported-browser-features`插件的最新版本是使用ESM的，根据`npm view stylelint-no-unsupported-browser-features@[Version] peerDependencies`来选择合适的版本
+
+```
+{
+  customSyntax: postLess,
+  plugins: [..., 'stylelint-no-unsupported-browser-features'],
+  rules: {
+    ...,
+    "plugin/no-unsupported-browser-features": [true, {
+      "browsers": [
+        "Chrome >=80",
+        "Firefox >=72",
+        "Safari >=13.1",
+        "Edge >=80"
+      ],
+      "ignore": ["css-nesting"],
+      "ignorePartialSupport": true
+    }]
+  }
+};
+```
+执行`stylelint`指令得到结果
+![PaymentRequest](/posts-img/stylelint-compat-1.png)
+从执行结果可以得到在指定浏览器版本中，`flexbox-gap`和`:not()`存在兼容问题
+
+也可通过VSCode的`stylelint`插件在编写代码的时候看到错误提示
+![PaymentRequest](/posts-img/stylelint-compat-2.png)
+
+
+只支持对`CSS`语法的检测，通过配置ignore选择把`css-nesting`,CSS嵌套语法校验忽略掉
+
+## 解决兼容问题
+
+检测到兼容问题后，需要根据实际情况给出兼容方案，并告知检测工具忽略掉已兼容的功能点。
+
+###  JavaScript
+
+#### 语法解析
+
+语法相关的兼容问题可以通过编译器来转译
+
+##### TypeScript
+
+在`TypeScript`项目中，直接在`tsconfig.json`中声明`target`属性，ts编译器会生成对应版本的js代码。
+
+比如当设置`target`为`es2019`或更早的版本，使用`?.`，会自动转译如下：
+
+```
+// ts
+const a = {b:1}
+a?.b === 1;
+
+// -> js
+"use strict";
+const a = { b: 1 };
+(a === null || a === void 0 ? void 0 : a.b) === 1;
+```
+
+使用`target`属性对应的版本之后的版本的功能特性，`TypeScript`编译器也会给出提示
+
+
+##### Vite应用
+
+1. Vite默认使用esbuild来编译，最低兼容es2015
+
+2. 使用`@vitejs/plugin-legacy`插件可以兼容更低版本，同时也支持添加polyfills，它是借助`babel`来完成
+
+##### Webpack项目
+
+配置`babel-loader`和`@babel/preset-env`来完成转译
+
+
+#### Polyfills
+
+
+##### polyfill.io
+
+大部分非语法特性都能在[polyfill.io](https://polyfill.io/)上找到补丁，可以根据ECAMScript版本批量添加，也可以单独添加某个特性的Polyfill，直接生成url
+
+polyfill.io 会根据请求头部的`User-Agent`来判断当前浏览器需要哪些polyfill
+
+也提供了self-hosted版本：https://github.com/jakeChampion/polyfill-service-self-hosted/
+
+##### core-js
+
+使用npm安装`core-js`后，直接导入需要的包
+
+### 样式
+
+检测到样式兼容问题后，解决思路主要有以下几种：
+- 1 换一种写法实现等价效果
+- 2 通过寻找PostCSS的插件来解决，部分特性可以通过插件进行转换代码，实现等价的功能
+- 3 给出对应的降级兼容方案，在低版本浏览器效果降级
+
+
+[部分插件列表参考](https://www.postcss.parts/)
+
+#### autoprefixer
+
+用来加给css属性加上不同浏览器的前缀，会从以上`package.json`中声明的`browserslist`为目标
+
+
+#### 一些伪类兼容插件
+
+- [:has()](https://www.npmjs.com/package/css-has-pseudo)
+- [:is()](https://www.npmjs.com/package/@csstools/postcss-is-pseudo-class)
+- [包含多参数的:not()](https://www.npmjs.com/package/postcss-selector-not)
+
+
+!: 需要注意的是，使用补丁插件可能存在优先级不一致，性能也可能有一些差异，需要斟酌着使用并花时间做充足的测试。
+
+## 项目模板参考
+
+https://github.com/hmilin/react-vite-template
+
