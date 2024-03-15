@@ -1,0 +1,42 @@
+---
+title: TypeScript 常用方法归纳
+date: "2024-03-14 10:00:00"
+description: TypeScript 在日常开发中常用实用的小方法
+---
+
+# TypeScript 常用方法归纳
+
+## 枚举转联合类型
+
+```
+export enum ProjectRole {
+  MANAGER = 'project_manager',
+  DEVELOPER = 'project_developer',
+  VIEWER = 'project_viewer',
+}
+
+type ProjectRoleUnion = `${ProjectRole}`
+// 等价于  "project_manager" | "project_developer" | "project_viewer"
+```
+
+
+## 拓展Window属性
+
+```
+declare global {
+  interface Window {
+    __PRODUCT_NAME__: string;
+  }
+}
+```
+
+## 设置部分属性设为可选
+`TypeScript`类型函数中有，`Required<T>`和`Partial<T>`，分别是将T中的所有属性设为required和optional，在日常类型复用中常常需要给特定几个属性设为必选或可选，可以全局声明一个`RequiredKeys`和`PartialKeys`方法
+
+```
+/** 设置部分key为required */
+type RequiredKeys<T, U extends keyof T = keyof T> = Required<Pick<T, U>> & Partial<Omit<T, U>>;
+
+/** 设置部分key为可选 */
+type PartialKeys<T, U extends keyof T = keyof T> = Partial<Pick<T, U>> & Omit<T, U>;
+```
