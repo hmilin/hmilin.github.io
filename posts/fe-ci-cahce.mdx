@@ -103,10 +103,15 @@ build-img:
   script:
     - until docker info; do sleep 1; done
     - docker login -u $HARBOR_USERNAME -p $HARBOR_PASSWORD ...
-    - mkdir pnpm-store
+    - mkdir -p pnpm-store
     - docker context create tls-environment
-    - docker buildx create --name multiarch-builder --use tls-environment
-    - docker buildx build ---cache-to type=local,dest=pnpm-store --cache-from type=local,src=pnpm-store --tag <registry>/<image> .
-    - docker push <registry>/<image>
+    - docker buildx create --name multiarch-builder --use tls-environment --driver docker-container --driver-opt image=moby/buildkit:master,network=host
+    - docker buildx build ---cache-to type=local,dest=pnpm-store --cache-from type=local,src=pnpm-store --cache-from=<registry>/<image:latest> --tag <registry>/<image:tag> --tag <registry>/<image:latest> --load .
+    - docker push <registry>/<image:tag>
+    - docker push <registry>/<image:latest>
 
 ```
+
+构建时声明了两个cache-from：
+- `--cache-from type=local,src=pnpm-store`： 指使用缓存的pnpm-store
+- `--cache-from=<registry>/<image:latest>`： 指将最近一个镜像拉到当前环境下，使用docker的layer缓存
