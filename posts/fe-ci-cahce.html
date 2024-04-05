@@ -1,0 +1,94 @@
+<!DOCTYPE html><html><head><meta charSet="utf-8"/><title>蛋黄派碎冰冰</title><meta name="description" content="蛋黄派碎冰冰的博客"/><link rel="icon" href="/favicon.ico"/><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"/><meta name="next-head-count" content="5"/><link rel="preload" href="/_next/static/css/da7f7373972fd13e.css" as="style"/><link rel="stylesheet" href="/_next/static/css/da7f7373972fd13e.css" data-n-g=""/><link rel="preload" href="/_next/static/css/2af2181b72eb90fa.css" as="style"/><link rel="stylesheet" href="/_next/static/css/2af2181b72eb90fa.css" data-n-p=""/><noscript data-n-css=""></noscript><script defer="" nomodule="" src="/_next/static/chunks/polyfills-5cd94c89d3acac5f.js"></script><script src="/_next/static/chunks/webpack-fe24048b3b27bff9.js" defer=""></script><script src="/_next/static/chunks/framework-1e9a4d353c1366cc.js" defer=""></script><script src="/_next/static/chunks/main-c8036f9753ad02f4.js" defer=""></script><script src="/_next/static/chunks/pages/_app-c011ee5ac2d8b7d0.js" defer=""></script><script src="/_next/static/chunks/249-5270d5c7a8955805.js" defer=""></script><script src="/_next/static/chunks/758-3579d4bae6c59ed8.js" defer=""></script><script src="/_next/static/chunks/pages/posts/%5Bslug%5D-481649dba8686aa3.js" defer=""></script><script src="/_next/static/ecFwFFUCx74hdcyc4Ixm5/_buildManifest.js" defer=""></script><script src="/_next/static/ecFwFFUCx74hdcyc4Ixm5/_ssgManifest.js" defer=""></script><script src="/_next/static/ecFwFFUCx74hdcyc4Ixm5/_middlewareManifest.js" defer=""></script></head><body><div id="__next" data-reactroot=""><div class="Layout_container__CSAqU"><header class="Header_header__Z4YN5"><a href="/">蛋黄派碎冰冰</a><nav><ul><li><a href="/#posts">文章</a></li><li><a href="/about">关于</a></li></ul></nav></header><main><div class="Layout_banner__0qsJd"><h1>pnpm-store几种缓存方式</h1><p>分别介绍在Gitlab CI、Docker、Gitlab CI中使用Docker构建镜像等多种情况下，如何将pnpm-store缓存下来。</p><div>2024-04-3 11:55:00</div></div><div class="content-container"><h1>pnpm-store几种缓存方式</h1>
+<h2>Gitlab CI</h2>
+<p>这种是官方文档中推荐的写法，适用于直接在Gitlab CI的Stage中直接使用pnpm</p>
+<p>.gitlab-ci.yml 文件：</p>
+<pre style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="block-code" style="white-space:pre"><span>stages:
+</span>  - build
+<!-- -->
+<span></span><span class="hljs-attr">build</span><span>:
+</span>  stage: build
+<span>  </span><span class="hljs-attr">image</span><span>: node:</span><span style="color:#d08770">18.17</span><span style="color:#d08770">.1</span><span>
+</span><span>  </span><span class="hljs-attr">before_script</span><span>:
+</span>    - corepack enable
+<span>    - corepack prepare pnpm@latest-</span><span style="color:#d08770">8</span><span> --activate
+</span>    - pnpm config set store-dir .pnpm-store
+<span>  </span><span class="hljs-attr">script</span><span>:
+</span>    - pnpm install # install dependencies
+<span>  </span><span class="hljs-attr">cache</span><span>:
+</span>    key:
+<!-- -->      files:
+<!-- -->        - pnpm-lock.yaml
+<span>    </span><span class="hljs-attr">paths</span><span>:
+</span>      - .pnpm-store
+</code></pre>
+<h2>Docker</h2>
+<p>在docker构建镜像时，没办法在容器内部和宿主机设置任何软连接和硬链接，只能通过<code>BuildKit</code>的缓存挂载来在多次build之间共享缓存</p>
+<p>Dockerfile文件：</p>
+<pre style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="block-code" style="white-space:pre"><span style="color:#b48ead">FROM</span><span> node:20-slim AS base
+</span><span>ENV </span><span style="color:#ebcb8b">PNPM_HOME</span><span>=</span><span style="color:#a3be8c">&quot;/pnpm&quot;</span><span>
+</span><span>ENV </span><span style="color:#ebcb8b">PATH</span><span>=</span><span style="color:#a3be8c">&quot;</span><span style="color:#bf616a">$PNPM_HOME</span><span style="color:#a3be8c">:</span><span style="color:#bf616a">$PATH</span><span style="color:#a3be8c">&quot;</span><span>
+</span><span></span><span style="color:#d08770">RUN</span><span> corepack </span><span style="color:#d08770">enable</span><span>
+</span>COPY . /app
+<!-- -->WORKDIR /app
+<!-- -->
+<span></span><span style="color:#b48ead">FROM</span><span> base AS prod-deps
+</span><span></span><span style="color:#d08770">RUN</span><span> </span><span style="color:#ebcb8b">--mount</span><span>=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
+</span>
+<span></span><span style="color:#b48ead">FROM</span><span> base AS build
+</span><span></span><span style="color:#d08770">RUN</span><span> </span><span style="color:#ebcb8b">--mount</span><span>=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+</span><span></span><span style="color:#d08770">RUN</span><span> pnpm </span><span style="color:#d08770">run</span><span> build
+</span>
+<span></span><span style="color:#b48ead">FROM</span><span> base
+</span><span>COPY </span><span style="color:#ebcb8b">--from</span><span>=prod-deps /app/node_modules /app/node_modules
+</span><span>COPY </span><span style="color:#ebcb8b">--from</span><span>=build /app/dist /app/dist
+</span>EXPOSE 8000
+<span>CMD [ </span><span style="color:#a3be8c">&quot;pnpm&quot;</span><span>, </span><span style="color:#a3be8c">&quot;start&quot;</span><span> ]
+</span></code></pre>
+<p>docker默认带了两种缓存存储方式，inline和local</p>
+<ol>
+<li>inline
+inline模式会像构建镜像层级一样将cache存储到镜像中，在下一次构建时声明cache-from，即可以将远程镜像拉取下来并使用其中的缓存层。</li>
+</ol>
+<p>inline cache 的构建指令：</p>
+<pre style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="block-code" style="white-space:pre"><span>docker buildx build --push -t &lt;registry&gt;/&lt;image&gt; \
+</span>  --cache-to type=inline \
+<span>  --cache-</span><span style="color:#b48ead">from</span><span> type=registry,ref=&lt;registry&gt;/&lt;image&gt; .
+</span></code></pre>
+<ol start="2">
+<li>local</li>
+</ol>
+<p>顾名思义local模式即是将cache存储到宿主机某一个目录下</p>
+<p>local cache 的构建指令：</p>
+<pre style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="block-code" style="white-space:pre"><span>docker buildx build --push -t &lt;registry&gt;/&lt;image&gt; \
+</span>  --cache-to type=local,dest=path/to/local/dir[,parameters...] \
+<span>  --cache-</span><span style="color:#b48ead">from</span><span> type=local,src=path/to/local/dir .
+</span></code></pre>
+<h2>Gitlab CI + Docker</h2>
+<p>为了让项目的构建和部署可以更好的兼容不同的CI平台或云平台，我通常会尽量让Dockerfile文件足以描述整个构建过程，简化CI脚本下执行指令的复杂度。</p>
+<p>在Gitlab CI中执行镜像构建，每次build都在一个全新的容器中执行，因此需要结合BuildKit cache的local模式和Gitlab CI的cache能力，Gitlab CI可以将当前构建环境中某个目录缓存下来，供下次构建使用，因此只需要将BuildKit cache local模式下的缓存目录缓存到Gitlab CI的cache中即可。</p>
+<p>.gitlab-ci.yaml文件：</p>
+<pre style="display:block;overflow-x:auto;background:#2b303b;color:#c0c5ce;padding:0.5em"><code class="block-code" style="white-space:pre"><span>stages:
+</span>  - build-img
+<!-- -->
+<!-- -->build-img:
+<span>  image: docker:</span><span style="color:#d08770">20.10</span><span style="color:#d08770">.16</span><span>-dind
+</span><span>  </span><span class="hljs-attr">stage</span><span>: build-img
+</span><span>  </span><span class="hljs-attr">cache</span><span>:
+</span>    paths:
+<!-- -->      - pnpm-store
+<span>  </span><span class="hljs-attr">script</span><span>:
+</span><span>    - until docker info; </span><span style="color:#b48ead">do</span><span> sleep </span><span style="color:#d08770">1</span><span>; done
+</span>    - docker login -u $HARBOR_USERNAME -p $HARBOR_PASSWORD ...
+<!-- -->    - mkdir -p pnpm-store
+<!-- -->    - docker context create tls-environment
+<!-- -->    - docker buildx create --name multiarch-builder --use tls-environment --driver docker-container --driver-opt image=moby/buildkit:master,network=host
+<span>    - docker buildx build ---cache-to type=local,dest=pnpm-store --cache-</span><span style="color:#b48ead">from</span><span> type=local,src=pnpm-store --cache-</span><span style="color:#b48ead">from</span><span>=&lt;registry&gt;</span><span style="color:#bf616a">/&lt;image:latest&gt; --tag &lt;registry&gt;/</span><span>&lt;image:tag&gt; --tag &lt;registry&gt;/&lt;image:latest&gt; --load .
+</span>    - docker push &lt;registry&gt;/&lt;image:tag&gt;
+<!-- -->    - docker push &lt;registry&gt;/&lt;image:latest&gt;
+<!-- -->
+</code></pre>
+<p>构建时声明了两个cache-from：</p>
+<ul>
+<li><code>--cache-from type=local,src=pnpm-store</code>： 指使用缓存的pnpm-store</li>
+<li><code>--cache-from=&lt;registry&gt;/&lt;image:latest&gt;</code>： 指将最近一个镜像拉到当前环境下，使用docker的layer缓存</li>
+</ul></div><div class="content-container"></div></main><footer class="grid place-items-center pb-4"><a href="https://github.com/hmilin" target="_blank" rel="noreferrer noopener">😘Github</a></footer></div></div><script id="__NEXT_DATA__" type="application/json">{"props":{"pageProps":{"source":{"compiledSource":"/*@jsxRuntime automatic @jsxImportSource react*/\nconst {Fragment: _Fragment, jsx: _jsx, jsxs: _jsxs} = arguments[0];\nconst {useMDXComponents: _provideComponents} = arguments[0];\nfunction _createMdxContent(props) {\n  const _components = Object.assign({\n    h1: \"h1\",\n    h2: \"h2\",\n    p: \"p\",\n    pre: \"pre\",\n    code: \"code\",\n    ol: \"ol\",\n    li: \"li\",\n    ul: \"ul\"\n  }, _provideComponents(), props.components);\n  return _jsxs(_Fragment, {\n    children: [_jsx(_components.h1, {\n      children: \"pnpm-store几种缓存方式\"\n    }), \"\\n\", _jsx(_components.h2, {\n      children: \"Gitlab CI\"\n    }), \"\\n\", _jsx(_components.p, {\n      children: \"这种是官方文档中推荐的写法，适用于直接在Gitlab CI的Stage中直接使用pnpm\"\n    }), \"\\n\", _jsx(_components.p, {\n      children: \".gitlab-ci.yml 文件：\"\n    }), \"\\n\", _jsx(_components.pre, {\n      children: _jsx(_components.code, {\n        children: \"stages:\\n  - build\\n\\nbuild:\\n  stage: build\\n  image: node:18.17.1\\n  before_script:\\n    - corepack enable\\n    - corepack prepare pnpm@latest-8 --activate\\n    - pnpm config set store-dir .pnpm-store\\n  script:\\n    - pnpm install # install dependencies\\n  cache:\\n    key:\\n      files:\\n        - pnpm-lock.yaml\\n    paths:\\n      - .pnpm-store\\n\"\n      })\n    }), \"\\n\", _jsx(_components.h2, {\n      children: \"Docker\"\n    }), \"\\n\", _jsxs(_components.p, {\n      children: [\"在docker构建镜像时，没办法在容器内部和宿主机设置任何软连接和硬链接，只能通过\", _jsx(_components.code, {\n        children: \"BuildKit\"\n      }), \"的缓存挂载来在多次build之间共享缓存\"]\n    }), \"\\n\", _jsx(_components.p, {\n      children: \"Dockerfile文件：\"\n    }), \"\\n\", _jsx(_components.pre, {\n      children: _jsx(_components.code, {\n        className: \"language-Dockerfile\",\n        children: \"FROM node:20-slim AS base\\nENV PNPM_HOME=\\\"/pnpm\\\"\\nENV PATH=\\\"$PNPM_HOME:$PATH\\\"\\nRUN corepack enable\\nCOPY . /app\\nWORKDIR /app\\n\\nFROM base AS prod-deps\\nRUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile\\n\\nFROM base AS build\\nRUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile\\nRUN pnpm run build\\n\\nFROM base\\nCOPY --from=prod-deps /app/node_modules /app/node_modules\\nCOPY --from=build /app/dist /app/dist\\nEXPOSE 8000\\nCMD [ \\\"pnpm\\\", \\\"start\\\" ]\\n\"\n      })\n    }), \"\\n\", _jsx(_components.p, {\n      children: \"docker默认带了两种缓存存储方式，inline和local\"\n    }), \"\\n\", _jsxs(_components.ol, {\n      children: [\"\\n\", _jsx(_components.li, {\n        children: \"inline\\ninline模式会像构建镜像层级一样将cache存储到镜像中，在下一次构建时声明cache-from，即可以将远程镜像拉取下来并使用其中的缓存层。\"\n      }), \"\\n\"]\n    }), \"\\n\", _jsx(_components.p, {\n      children: \"inline cache 的构建指令：\"\n    }), \"\\n\", _jsx(_components.pre, {\n      children: _jsx(_components.code, {\n        children: \"docker buildx build --push -t \u003cregistry\u003e/\u003cimage\u003e \\\\\\n  --cache-to type=inline \\\\\\n  --cache-from type=registry,ref=\u003cregistry\u003e/\u003cimage\u003e .\\n\"\n      })\n    }), \"\\n\", _jsxs(_components.ol, {\n      start: \"2\",\n      children: [\"\\n\", _jsx(_components.li, {\n        children: \"local\"\n      }), \"\\n\"]\n    }), \"\\n\", _jsx(_components.p, {\n      children: \"顾名思义local模式即是将cache存储到宿主机某一个目录下\"\n    }), \"\\n\", _jsx(_components.p, {\n      children: \"local cache 的构建指令：\"\n    }), \"\\n\", _jsx(_components.pre, {\n      children: _jsx(_components.code, {\n        children: \"docker buildx build --push -t \u003cregistry\u003e/\u003cimage\u003e \\\\\\n  --cache-to type=local,dest=path/to/local/dir[,parameters...] \\\\\\n  --cache-from type=local,src=path/to/local/dir .\\n\"\n      })\n    }), \"\\n\", _jsx(_components.h2, {\n      children: \"Gitlab CI + Docker\"\n    }), \"\\n\", _jsx(_components.p, {\n      children: \"为了让项目的构建和部署可以更好的兼容不同的CI平台或云平台，我通常会尽量让Dockerfile文件足以描述整个构建过程，简化CI脚本下执行指令的复杂度。\"\n    }), \"\\n\", _jsx(_components.p, {\n      children: \"在Gitlab CI中执行镜像构建，每次build都在一个全新的容器中执行，因此需要结合BuildKit cache的local模式和Gitlab CI的cache能力，Gitlab CI可以将当前构建环境中某个目录缓存下来，供下次构建使用，因此只需要将BuildKit cache local模式下的缓存目录缓存到Gitlab CI的cache中即可。\"\n    }), \"\\n\", _jsx(_components.p, {\n      children: \".gitlab-ci.yaml文件：\"\n    }), \"\\n\", _jsx(_components.pre, {\n      children: _jsx(_components.code, {\n        children: \"stages:\\n  - build-img\\n\\nbuild-img:\\n  image: docker:20.10.16-dind\\n  stage: build-img\\n  cache:\\n    paths:\\n      - pnpm-store\\n  script:\\n    - until docker info; do sleep 1; done\\n    - docker login -u $HARBOR_USERNAME -p $HARBOR_PASSWORD ...\\n    - mkdir -p pnpm-store\\n    - docker context create tls-environment\\n    - docker buildx create --name multiarch-builder --use tls-environment --driver docker-container --driver-opt image=moby/buildkit:master,network=host\\n    - docker buildx build ---cache-to type=local,dest=pnpm-store --cache-from type=local,src=pnpm-store --cache-from=\u003cregistry\u003e/\u003cimage:latest\u003e --tag \u003cregistry\u003e/\u003cimage:tag\u003e --tag \u003cregistry\u003e/\u003cimage:latest\u003e --load .\\n    - docker push \u003cregistry\u003e/\u003cimage:tag\u003e\\n    - docker push \u003cregistry\u003e/\u003cimage:latest\u003e\\n\\n\"\n      })\n    }), \"\\n\", _jsx(_components.p, {\n      children: \"构建时声明了两个cache-from：\"\n    }), \"\\n\", _jsxs(_components.ul, {\n      children: [\"\\n\", _jsxs(_components.li, {\n        children: [_jsx(_components.code, {\n          children: \"--cache-from type=local,src=pnpm-store\"\n        }), \"： 指使用缓存的pnpm-store\"]\n      }), \"\\n\", _jsxs(_components.li, {\n        children: [_jsx(_components.code, {\n          children: \"--cache-from=\u003cregistry\u003e/\u003cimage:latest\u003e\"\n        }), \"： 指将最近一个镜像拉到当前环境下，使用docker的layer缓存\"]\n      }), \"\\n\"]\n    })]\n  });\n}\nfunction MDXContent(props = {}) {\n  const {wrapper: MDXLayout} = Object.assign({}, _provideComponents(), props.components);\n  return MDXLayout ? _jsx(MDXLayout, Object.assign({}, props, {\n    children: _jsx(_createMdxContent, props)\n  })) : _createMdxContent(props);\n}\nreturn {\n  default: MDXContent\n};\n","frontmatter":{},"scope":{"title":"pnpm-store几种缓存方式","date":"2024-04-3 11:55:00","description":"分别介绍在Gitlab CI、Docker、Gitlab CI中使用Docker构建镜像等多种情况下，如何将pnpm-store缓存下来。"}},"frontMatter":{"title":"pnpm-store几种缓存方式","date":"2024-04-3 11:55:00","description":"分别介绍在Gitlab CI、Docker、Gitlab CI中使用Docker构建镜像等多种情况下，如何将pnpm-store缓存下来。"}},"__N_SSG":true},"page":"/posts/[slug]","query":{"slug":"fe-ci-cahce"},"buildId":"ecFwFFUCx74hdcyc4Ixm5","isFallback":false,"gsp":true,"scriptLoader":[]}</script></body></html>
