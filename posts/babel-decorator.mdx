@@ -1,0 +1,49 @@
+---
+title: babel升级报错：Decorators cannot be used to decorate object literal properties
+date: "2024-04-08 17:24:12"
+description: 为什么babel版本升级之后会报以下错误：Decorators cannot be used to decorate object literal properties
+cover: /babel-decorator-cover.png
+---
+
+
+## 现象
+
+在升级`webpack`版本号时，将`babel-loader`从7.x升级到9.x，运行代码之后发现`babel`编译时装饰器语法出现错误：`Decorators cannot be used to decorate object literal properties.`
+
+
+## 原因
+
+原因如提示所说，装饰器无法在对象属性上使用。
+
+通过查询文档发现，babel在7.x以及之前的版本，是支持在对象属性上使用装饰器的
+```JavaScript
+const myObj = {
+  @dec1 foo: 3,
+  @dec2 bar() {},
+};
+```
+
+由于在`ECMA`规范中移除了对象属性装饰器的用法，到目前为止也没有再重新支持，所以babel目前也不支持该用法（Typescript编译器也不支持）
+
+[相关讨论](https://github.com/tc39/proposal-decorators/issues/119)
+
+
+## 解决方法
+
+方法一：
+
+使用非对象属性装饰器，毕竟不是规范的语法。
+
+方法二：
+
+在babel的配置中设置`@babel/plugin-proposal-decorators`插件的version参数为`legacy`
+
+```
+options: {
+  plugins: [
+            ["@babel/plugin-proposal-decorators", { "version": "legacy" }]
+          ]
+}
+```
+
+[不同版本的差异](https://babeljs.io/docs/babel-plugin-proposal-decorators#version)
