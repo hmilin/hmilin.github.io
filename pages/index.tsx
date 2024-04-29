@@ -6,6 +6,7 @@ import Link from "next/link";
 import Layout from "../components/Layout";
 import styles from "../styles/Home.module.css";
 import { postFilePaths, POSTS_PATH } from "../utils/mdxUtils";
+import Image from "next/image";
 
 type MatterDate = {
   title: string;
@@ -29,17 +30,24 @@ const Home: NextPage<HomeProps> = ({ posts }) => {
     <Layout>
       <div id="posts" className={styles.postContainer}>
         {posts.map((post) => (
-          <Link key={post.title} href={`posts/${post.path}`}>
-            <a className={styles.card}>
-              <div>
-                <img src={post.cover || "/empty.jpg"} alt="cover" />
-              </div>
-              <div>
-                <h3>{post.title}</h3>
-                <p>{post.description}</p>
-              </div>
-              <div className={styles.time}>{post.date}</div>
-            </a>
+          <Link
+            key={post.title}
+            href={`posts/${post.path}`}
+            className={styles.card}
+          >
+            <div>
+              <Image
+                width={232}
+                height={168}
+                src={post.cover || "/empty.jpg"}
+                alt="cover"
+              />
+            </div>
+            <div>
+              <h3>{post.title}</h3>
+              <p>{post.description}</p>
+            </div>
+            <div className={styles.time}>{post.date}</div>
           </Link>
         ))}
       </div>
