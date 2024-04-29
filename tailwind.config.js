@@ -1,12 +1,42 @@
 const plugin = require("tailwindcss/plugin");
 
+/** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
     "./pages/**/*.{js,ts,jsx,tsx}",
     "./components/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        blue: {
+          50: '#DCE1FF',
+          100: '#B6C4FF',
+          200: '#9AA9E4',
+          300: '#7F8EC8',
+          400: '#6675AC',
+          500: '#4d5c92',
+          600: '#415085',
+          700: '#354478',
+          800: '#29386C',
+          900: '#1D2D60',
+          950: '#112255',
+        },
+        amber: {
+          950: "#2D2500",
+          900: "#393000",
+          800: "#463B00",
+          700: "#534600",
+          600: "#605200",
+          500: "#6D5E0E",
+          400: "#877728",
+          300: "#A3903F",
+          200: "#BEAB56",
+          100: "#DBC66E",
+          50: "#F8E287",
+        }
+      }
+    },
   },
   plugins: [
     plugin(function ({ addBase, theme }) {
@@ -53,10 +83,10 @@ module.exports = {
         },
         a: {
           fontWeight: theme("fontWeight.semibold"),
-          color: theme("colors.indigo.600"),
+          color: theme("colors.blue.600"),
         },
         "a:hover": {
-          color: theme("colors.indigo.400"),
+          color: theme("colors.blue.400"),
         },
         "a code": {
           color: "inherit",
