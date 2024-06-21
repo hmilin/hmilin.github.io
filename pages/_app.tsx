@@ -6,8 +6,8 @@ function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
-        <title>蛋黄派碎冰冰</title>
-        <meta name="description" content="蛋黄派碎冰冰的博客" />
+        <title>Meiling's Blog</title>
+        <meta name="description" content="meiling的博客" />
         <link rel="icon" href="/favicon.ico" />
         <meta
           name="viewport"

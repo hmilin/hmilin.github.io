@@ -14,7 +14,7 @@ const Header: NextPage<{}> = () => {
         [styles.scrolled]: scroll?.top && scroll?.top > 600,
       })}
     >
-      <Link href="/">蛋黄派碎冰冰</Link>
+      <Link href="/">Meiling's Blog</Link>
       <nav>
         <ul>
           <li>
