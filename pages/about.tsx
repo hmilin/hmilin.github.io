@@ -27,7 +27,13 @@ export async function getStaticProps() {
 
 const About: NextPage<{ data: AboutData }> = ({ data }) => {
   return (
-    <Layout>
+    <Layout
+      cover={
+        <div>
+          <h1>个人介绍</h1>
+        </div>
+      }
+    >
       <div className={classNames("content-container", styles.aboutContainer)}>
         <div className={styles.avatar}>
           <img src={data.avatar} alt="avatar" />

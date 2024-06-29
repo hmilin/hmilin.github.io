@@ -1,0 +1,6 @@
+.searchPage {
+  background: theme(colors.neutral.98);
+  main {
+    padding: 40px 60px;
+  }
+}

@@ -20,7 +20,8 @@ import Link from "next/link";
 const searchClient = algoliasearch(ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY);
 
 const CustomHits: React.FC<HitsProps<any>> = () => {
-  const { hits } = useHits<any>();
+  const { hits, results } = useHits<any>();
+  const query = results?.query;
 
   const menus = useMemo(
     () =>
@@ -32,15 +33,18 @@ const CustomHits: React.FC<HitsProps<any>> = () => {
     [hits]
   );
 
-  console.log('menus',menus)
-
   return (
-    <div className={styles["search-dropdown"]}>
-      {menus.map((menu) => (
-        <div className={styles["menu-item"]} key={menu.title}>
-          <Link href={menu.url}>{menu.title}</Link>
-        </div>
-      ))}
+    <div className={styles["search-menus"]}>
+      {query &&
+        menus.map((menu) => (
+          <Link
+            className={styles["menu-item"]}
+            key={menu.title}
+            href={menu.url}
+          >
+            {menu.title}
+          </Link>
+        ))}
     </div>
   );
 };

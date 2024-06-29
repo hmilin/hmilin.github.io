@@ -4,42 +4,37 @@ import Head from "next/head";
 import Image from "next/image";
 import Header from "../Header";
 import styles from "./index.module.css";
+import { HTMLAttributes, PropsWithChildren, ReactNode } from "react";
+import classNames from "classnames";
 
 interface LayoutProps {
-  title?: string;
-  description?: string;
-  time?: string;
-  search?: boolean;
+  cover?: ReactNode;
+  className?: HTMLAttributes<HTMLDivElement>["className"];
 }
 
-const Layout: NextPage<LayoutProps> = ({
+const Layout: NextPage<PropsWithChildren<LayoutProps>> = ({
+  cover,
   children,
-  title,
-  description,
-  time,
-  search = true,
+  className,
 }) => {
   return (
-    <div className={styles.container}>
+    <div className={classNames(styles.container, className)}>
       <Header />
-      <main>
-        <div className={styles.banner}>
-          <h1>{title}</h1>
-          <p>{description}</p>
-          {time && <div>{time}</div>}
-        </div>
-        {children}
-      </main>
-      {search && <GlobalSearch className={styles["search-container"]} />}
-      <footer className="grid place-items-center pb-4">
-        <a
-          href="https://github.com/hmilin"
-          target="_blank"
-          rel="noreferrer noopener"
-        >
-          😘Github
-        </a>
-      </footer>
+      <div>
+        <main>
+          {cover && <div className={styles.cover}>{cover}</div>}
+          {children}
+        </main>
+        <footer className="grid place-items-center pb-4">
+          <a
+            href="https://github.com/hmilin"
+            target="_blank"
+            rel="noreferrer noopener"
+          >
+            😘Github
+          </a>
+        </footer>
+      </div>
     </div>
   );
 };

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbo",
+    "dev": "next dev",
     "dev:watch": "next-remote-watch ./posts",
     "build": "next build",
     "update:postIndex": "node --loader ts-node/esm ./scripts/build-algolia-search.ts",
@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@giscus/react": "^2.2.0",
+    "@svgr/webpack": "^8.1.0",
     "ahooks": "^3.3.0",
     "algoliasearch": "^4.16.0",
     "classnames": "^2.3.1",
@@ -34,6 +35,7 @@
     "eslint": "8.11.0",
     "eslint-config-next": "14.2.3",
     "postcss": "^8.4.12",
+    "postcss-nested": "^6.0.1",
     "tailwindcss": "^3.0.23",
     "ts-node": "^10.9.1",
     "tslib": "^2.5.0",

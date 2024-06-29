@@ -29,10 +29,13 @@ const components = {
 const PostsPage: NextPage<PostsPageProps> = ({ source, frontMatter }) => {
   return (
     <Layout
-      title={frontMatter.title}
-      description={frontMatter.description}
-      time={frontMatter.date}
-      search={false}
+      cover={
+        <div>
+          <h1>{frontMatter.title}</h1>
+          <p>{frontMatter.description}</p>
+          <div>{frontMatter.date}</div>
+        </div>
+      }
     >
       <div className="content-container">
         <MDXRemote {...source} components={components} />
