@@ -2,10 +2,15 @@
   position: fixed;
   top: 0;
   left: 0;
+  z-index: 1;
   width: 88px;
   height: 100%;
   padding: 24px 0;
   background-color: theme(colors.neutral.98);
+
+  .mobileNav {
+    display: none;
+  }
 
   .searchBtn {
     display: inline-block;
@@ -14,11 +19,13 @@
     border-radius: 12px;
   }
 
-  nav {
+  .nav {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 20px;
+    padding: 0 24px;
 
     a {
       color: theme(colors.neutral.5);
@@ -54,11 +61,88 @@
         line-height: 1.5;
       }
     }
+
+    .closeIcon {
+      display: none;
+      position: absolute;
+      top: 0;
+      right: 24px;
+      cursor: pointer;
+    }
   }
 }
 
 @media (max-width: 768px) {
   .header {
+    width: 100%;
+    height: 64px;
     padding: 0 24px;
+
+    .mobileNav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 100%;
+    }
+
+    .menuIcon,
+    .searchBtn {
+      display: inline-block;
+      padding: 8px;
+      background: theme(colors.secondary.90);
+      border-radius: 12px;
+      cursor: pointer;
+    }
+
+    .nav {
+      position: fixed;
+      top: 64px;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 2;
+      padding-top: 32px;
+      transform: translateX(-100%);
+      transition: all 0.3s ease-in-out;
+      background-color: theme(colors.neutral.98);
+
+      a {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        border-radius: 16px;
+        font-size: 16px;
+        padding: 16px 8px;
+
+        .icon {
+          padding: 0;
+        }
+
+        &:hover {
+          background-color: theme(colors.neutral.95);
+          svg {
+            transform: scale(1.1);
+          }
+        }
+        &.active {
+          background-color: theme(colors.neutral-variant.90);
+        }
+
+        .title {
+          margin-top: 0;
+        }
+      }
+
+      .closeIcon {
+        display: block;
+      }
+
+      .searchBtn {
+        display: none;
+      }
+    }
+    .nav.open {
+      transform: translateX(0);
+    }
   }
 }

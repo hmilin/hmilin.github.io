@@ -4,3 +4,11 @@
     padding: 40px 60px;
   }
 }
+
+@media (max-width: 768px) {
+  .searchPage {
+    main {
+      padding: 40px 24px;
+    }
+  }
+}

@@ -15,7 +15,7 @@ body {
 }
 
 .content-container {
-  margin: 24px 40px ;
+  margin: 24px 40px;
   background: theme(colors.primary.98);
   box-shadow: 0px 0px 80px theme(colors.primary.99);
   border-radius: 24px;
@@ -28,8 +28,8 @@ body {
 
 @media (max-width: 768px) {
   .content-container {
-    width: calc(100% - 48px);
     min-width: revert;
+    margin: 12px 24px;
   }
 }
 

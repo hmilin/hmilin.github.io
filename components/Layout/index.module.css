@@ -2,8 +2,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  overflow: auto;
+  min-height: 100vh;
   background-color: #fff;
   header + div {
     display: flex;
@@ -23,26 +22,19 @@
   color: theme(colors.neutral.0);
   background: theme(colors.secondary.95);
   border-radius: 28px;
-}
-
-.banner h1 {
-  font-size: 32px;
-}
-
-.banner p {
-  font-size: 24px;
+  & *:last-child {
+    margin-bottom: 0;
+  }
 }
 
 @media (max-width: 768px) {
-  .banner {
-    height: 480px;
-    background-position: 60% 56%;
-    padding: 80px 24px;
+  .container {
+    header + div {
+      padding-left: 0px;
+      padding-top: 66px;
+    }
   }
-  .banner h1 {
-    font-size: 24px;
-  }
-  .banner p {
-    font-size: 20px;
+  .cover {
+    margin: 12px 24px;
   }
 }

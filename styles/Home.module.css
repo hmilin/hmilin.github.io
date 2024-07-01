@@ -1,6 +1,6 @@
 .postContainer {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 48px;
   margin: 48px 40px;
 }
@@ -54,6 +54,13 @@
   .time {
     text-align: right;
     color: theme(colors.neutral.30);
+  }
+}
+
+@media (max-width: 1500px) {
+  .postContainer {
+    width: auto;
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 

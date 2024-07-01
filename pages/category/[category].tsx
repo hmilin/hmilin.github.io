@@ -50,7 +50,7 @@ const CategoryPage: NextPage<CategoryProps> = ({ posts, category }) => {
         {posts.map((post) => (
           <Link
             key={post.title}
-            href={`posts/${post.path}`}
+            href={`/posts/${post.path}`}
             className={styles.card}
           >
             <div>
