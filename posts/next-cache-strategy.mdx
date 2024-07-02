@@ -1,0 +1,141 @@
+---
+title: Next.js 中App Router的缓存策略
+date: "2024-6-18 18:30"
+description: Next.js 中App Router的缓存策略的归纳和使用
+public: true
+category: framework
+cover: /posts-img/caching-overview.jpg
+---
+
+# Next.js 中 App Router 的缓存策略
+
+Next.js 的`App Router`模式下的缓存策略比原先的`Page Router`丰富了很多。在原来的 Page Router，只有路由一种缓存对象，在使用`getStaticProps`和`getServerSideProps`两个钩子的使用直接代表了使用缓存与不使用缓存，没有更多的操控空间，行为也很容易预测。
+
+在使用 App Router 模式后，缓存的规则丰富了很多，也给出一些可供用户使用的 API，虽然 Next.js 的文档称了解缓存策略不是必须的，在对 Next 中的 API 调用时，框架已经使用了最优的缓存方式。但随着业务开发的丰富，默认的 cache 行为产生了一些意料不到的异常，因此在经过一番资料阅读之后做一些总结。
+
+## 缓存分类
+
+| 策略                                                                                                     | 对象                | 位置   | 目的                       | 时机                 |
+| -------------------------------------------------------------------------------------------------------- | ------------------- | ------ | -------------------------- | -------------------- |
+| [Request Memoization](https://nextjs.org/docs/app/building-your-application/caching#request-memoization) | 函数返回值          | Server | 在 react 组件树中复用数据  | 每个请求的生命周期   |
+| [Data Cache](https://nextjs.org/docs/app/building-your-application/caching#data-cache)                   | 数据                | Server | 跨用户请求和部署共享数据   | 持久（可以重新验证） |
+| [Full Route Cache](https://nextjs.org/docs/app/building-your-application/caching#full-route-cache)       | HTML 和 RSC payload | Server | 减少渲染成本和提高性能     | 持久（可以重新验证） |
+| [Router Cache](https://nextjs.org/docs/app/building-your-application/caching#router-cache)               | RSC Payload         | Client | 在路由变化时减少服务端请求 | 用户会话或基于时间   |
+
+## Request Memorization
+
+Request Memorization 是完全继承自 React 的行为，React 基于 fetch API 的自动缓存策略实现了在组件树中对 request 的缓存，详见 React 文档[cache](https://react.dev/reference/react/cache)。在多个组件中调用同一个接口时，已无需在根组件调用数据然后传递到子组件，直接在需要数据中的组件调用，react 会提取并缓存 request（只对 fetch GET 请求起作用），这个行为只发生在服务端组件，且所有 react 的 ssr 框架会有一致的行为。
+
+在 nextjs 中，缓存只发生在同一次请求和渲染中，因此没有清除缓存的入口和必要性。
+
+## Data Cache
+
+Next.js 实现了对构建数据和服务端请求数据的缓存。由于 Next.js 是基于 fetch API 实现了该方面的缓存，用户可以针对每个 fetch 请求设置参数来实现不一样的缓存策略。默认情况下所有服务端的 fetch 请求都会被缓存，可以使用`cache`和`next.revalidate`  操控。
+
+Next.js 会保持使用数据缓存，除非用户手动重新验证或禁用缓存。触发重新验证的方法有两种：基于时间重新验证、按需重新验证。
+
+### 基于时间重新验证
+
+通过 fetch 接口制定时间参数来告诉 next 何时重新验证。第一次从外部数据源取数据之后 next 会将数据缓存起来，在指定的时间之前重新请求数据，都将从缓存中拿，超过指定时间之后会重新认证并返回最新数据，新一轮的缓存时间从头开始计算。在这种模式下，旧数据会保持到新数据拿到之后才被替换，有点类似 stale-while-revalidate 的行为。
+
+```jsx
+// Revalidate at most every hour
+fetch("https://...", { next: { revalidate: 3600 } });
+```
+
+### 按需重新验证
+
+按需重新认证主要通过两个 API 完成： `revalidatePath` 和`revalidateTag` ，`revalidatePath` 用于指定某个路由下的数据缓存需要重新认证，`revalidateTag` 需要通过 fetch 的`options.next.tags` 参数指定 tag 来使用。
+
+从外部数据请求时数据会被缓存起来，调用`revalidatePath` 或`revalidateTag`时，缓存会被清除，再次请求时会从外部数据源拿最新的数据。
+
+**在 client 组件调用**
+
+在实际使用中，我们经常会有需要在 client 组件中触发重新认证的场景，比如更新了用户登录信息，或修改了一些数据需要及时展示。而`revalidatePath` 和`revalidateTag`两个方法是在服务端调用的，这时需要声明`Server Actions`，然后在客户端组件中调用该函数。
+
+```jsx
+"use server";
+
+import { revalidatePath } from "next/cache";
+
+export async function createPost() {
+  try {
+    // ...
+  } catch (error) {
+    // ...
+  }
+
+  revalidatePath("/posts");
+}
+```
+
+### 禁用缓存
+
+next 提供给了几种方式用于声明不使用缓存
+
+1. 使用 fetch 的 no-store 参数，对于在浏览器发出的请求，声明 no-store 可以绕过强制缓存，在 next 服务端调用的 fetch 也沿用了这一设定。
+
+```jsx
+// Opt out of caching for an individual `fetch` request
+fetch(`https://...`, { cache: "no-store" });
+```
+
+1. 在 layout 或 page 中声明动态渲染参数
+
+```jsx
+const dynamic = "force-dynamic";
+```
+
+## Full Route Cache
+
+这一部分的缓存对象是构建产生的 html 和 RSC Payload，html 来自构建时注入的静态数据或预渲染数据，和请求时在服务端渲染的 html 结果，RSC Payload 则是一份复杂的二进制文件，包含了服务端组件的渲染结果、客户端组件的占位信息和 js 文件、从服务端组件传递到客户端组件的任何属性。
+
+**重新验证的方法有两种：**
+
+一种是重新部署，一种是重新验证理由下的 Data Cache。
+
+在 client 的路由跳转中，当跳转到某个路由下时，next 发送的 GET 请求`/{path}?_rsc=xxx` ，\_rsc 代表一个 cacheKey，当重新验证 Data Cache 的时候，使用该数据源的路由的 cacheKey 会发生变化，当跳转的时候，服务端通过 cacheKey 的变化知道该忽略缓存。
+
+## Router Cache
+
+Router Cache 是在客户端对已加载或预加载的路由的缓存，与 Full Router Cache 不同的是：Router Cache 只在相同的用户会话中缓存，支持缓存静态渲染和动态渲染。
+
+Router Cache 存在整个会话期间，在刷新页面后失效。
+
+需要注意的是 next.js 内置了基于时间的过期策略：
+
+- 静态渲染并指定了 prefetch 的路由，过期时间为 5 分钟
+- prefetch={null}  或未指定，或为动态渲染的页面，过期时间为 30s
+
+从页面上的效果来看，在指定的时间内跳转路由，客户端之间拿之前的缓存渲染，不会再重新请求服务器（不发送`/{path}?_rsc=xxx` 请求）。
+
+<aside>
+🔑 在next@14.2.0-canary.53之后的版本中支持了过期时间的设置
+[https://nextjs.org/docs/app/api-reference/next-config-js/staleTimes](https://nextjs.org/docs/app/api-reference/next-config-js/staleTimes)
+
+</aside>
+
+### 手动废弃
+
+执行以下 API 也可以手动废弃掉缓存
+
+- 服务端 api
+  - `revalidatePath` 或`revalidateTag`
+  - [`cookies.set`](https://nextjs.org/docs/app/api-reference/functions/cookies#cookiessetname-value-options)  或  [`cookies.delete`](https://nextjs.org/docs/app/api-reference/functions/cookies#deleting-cookies)
+- 客户端下的[`router.refresh`](https://nextjs.org/docs/app/api-reference/functions/use-router)
+
+## 总结
+
+虽然缓存分 4 种，但每种缓存不是独立存在的，当你通过某个 API 重新验证某一类缓存时，其他缓存也可能跟着被更新，因此需要根据具体的使用情况和现象来分析并确认最佳使用方式。
+
+## 延申思考
+
+Next.js 的 APP Router 确实比较难用，有别于传统的 SPA 应用，在开发 next 应用时我们不得不考虑代码或组件哪些部分工作在客户端哪些部分工作在服务端，但它确实提供了很多性能优化的优质实践方式。在对 Next.js 更深入的学习过程中，还能发现一些 React 官方最新提供的实验性 API 和一些未来发展的趋势。
+
+## 参考资料
+
+[Next.js 文档- App Router-Caching](https://nextjs.org/docs/app/building-your-application/caching#data-cache)
+
+[与缓存相关的 API](https://nextjs.org/docs/app/building-your-application/caching#apis)
+
+[Github discussion 中对缓存的深度讨论](https://github.com/vercel/next.js/discussions/54075)

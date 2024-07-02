@@ -192,6 +192,11 @@ module.exports = {
           flex: "none",
           minWidth: "100%",
         },
+        "table td": {
+          border: "1px solid",
+          borderColor: theme("colors.neutral.80"),
+          padding: 8,
+        },
       });
     }),
   ],
