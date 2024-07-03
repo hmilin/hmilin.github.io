@@ -15,16 +15,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Use Node.js 18.16.0
-      uses: actions/setup-node@v3
+      uses: actions/checkout@v4
       with:
-        node-version: '18.16.0'
+        node-version: 20
         
     - name: Install pnpm
-      uses: pnpm/action-setup@v2.2.4
+      uses: pnpm/action-setup@v4
       with:
-        version: 7
+        version: 8
 
     - name: Get pnpm store directory
       id: pnpm-cache
@@ -32,7 +32,7 @@ jobs:
       run: |
         echo "STORE_PATH=$(pnpm store path | tr -d '\n')" >> $GITHUB_OUTPUT
     - name: Setup pnpm cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
         key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
