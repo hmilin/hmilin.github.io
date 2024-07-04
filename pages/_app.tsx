@@ -6,7 +6,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
-        <title>Meiling's Blog</title>
+        <title>{`Meiling's Blog`}</title>
         <meta name="description" content="meiling的博客" />
         <link rel="icon" href="/favicon.ico" />
         <meta
