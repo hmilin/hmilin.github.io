@@ -4,13 +4,14 @@ import { AboutData } from "./api/about";
 import classNames from "classnames";
 
 import styles from "../styles/about.module.css";
+import Image from "next/image";
 
 export async function getStaticProps() {
   return {
     props: {
       data: {
         cover: "bk.jpg",
-        avatar: "avatar.png",
+        avatar: "/avatar.png",
         name: "美玲",
         introduce: "前端开发，19届，广东工业大学信息工程专业",
         icons: [
@@ -36,7 +37,7 @@ const About: NextPage<{ data: AboutData }> = ({ data }) => {
     >
       <div className={classNames("content-container", styles.aboutContainer)}>
         <div className={styles.avatar}>
-          <img src={data.avatar} alt="avatar" />
+          <Image src={data.avatar} width={100} height={100} alt="avatar" />
         </div>
         <h2>{data.name}</h2>
         <p>{data.introduce}</p>
@@ -49,7 +50,7 @@ const About: NextPage<{ data: AboutData }> = ({ data }) => {
               target="_blank"
               className="inline-block"
             >
-              <img src={icon.cover} alt={icon.name} />
+              <Image src={icon.cover} width={20} height={20} alt={icon.name} />
             </a>
           ))}
         </div>
