@@ -43,7 +43,7 @@ jobs:
       run: pnpm install
       
     - name: Build my App
-      run: pnpm build && pnpm export && touch ./out/.nojekyll && pnpm update:postIndex
+      run: pnpm build && touch ./out/.nojekyll && pnpm update:postIndex
       env: 
         ALGOLIA_SEARCH_ADMIN_KEY: ${{ secrets.ALGOLIA_SEARCH_ADMIN_KEY }}
       
