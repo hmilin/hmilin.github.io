@@ -6,7 +6,7 @@
     "dev": "next dev",
     "dev:watch": "next-remote-watch ./posts",
     "build": "next build",
-    "update:postIndex": "node --loader ts-node/esm ./scripts/build-algolia-search.ts",
+    "update:postIndex": "node -r ts-node/register ./scripts/build-algolia-search.ts",
     "start": "next start",
     "lint": "next lint"
   },
