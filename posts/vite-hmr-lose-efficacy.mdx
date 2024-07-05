@@ -1,0 +1,136 @@
+---
+title: 解决Vite hmr失效问题
+date: "2024-07-05 22:23:00"
+description: T在将vite从4.x升级到5.x后，由于循环依赖导致了hmr失效
+category: tool
+cover: /posts-img/vite+react.png
+---
+
+# 解决Vite hmr失效问题
+
+在将vite从4.x升级到5.x后，发现hmr不能正常工作，一番调试之后发现是由于循环依赖导致的。ESModule能正常处理循环，但仍可能出现异常，且对大型应用性能会有影响。
+
+在Vite5.x之后的版本中，对含有循环依赖的文件进行修改，vite会重新加载页面而非使用热更新。为使应用能正常使用热更新，需要解决循环依赖的问题。
+
+## 发现原因
+
+1. 查看ws链接查看文件更新的消息明细
+    
+    开启hmr后，vite会维持一个websocket链接，开发服务器通过给客户端发消息，告诉客户端文件更新的信息
+    
+    当我修改某个组件的文件时，可以看到服务器发送了一条消息信息如下：
+    
+    ```jsx
+    {
+        "type": "update",
+        "updates": [
+            {
+                "type": "js-update",
+                "timestamp": 1720070246631,
+                "path": "/src/components/header/index.tsx",
+                "acceptedPath": "/src/components/header/index.tsx",
+                "explicitImportRequired": false,
+                "isWithinCircularImport": true,
+                "ssrInvalidates": []
+            },
+        ]
+    }
+    ```
+    
+
+跟往常的信息对比，发现`isWithinCircularImport` 字段为true，猜测页面重刷和该字段有关系
+
+1. 在github issues中检索`isWithinCircularImport` 发现有关于循环依赖导致热更新失效的问题
+2. 查阅官网，在**Troubleshooting**一节中有关于热更新失败的原因之一就是循环依赖，可通`—-debug` 来查看原因
+
+      [A full reload happens instead of HMR](https://vitejs.dev/guide/troubleshooting.html#a-full-reload-happens-instead-of-hmr)
+
+1. 打开调试错误信息后，在修改含循环依赖的文件时，日志如下：
+
+```jsx
+vite:hmr circular imports detected: /src/components/header/index.tsx -> /src/store/slices/user.ts -> /src/utils/history.ts -> /src/routes/index.tsx -> /src/layouts/default.tsx -> /src/components/header/index.tsx
+```
+
+在之前升级`react-router` 版本时，使用了`BrowserRouter` 代替`HistoryRouter` 时引入了循环依赖问题。
+
+## 解决循环依赖
+
+`React Router`6.4之后的版本完全废弃了对5.x版本的兼容，也废弃了`HistoryRouter` 的用法，官方推荐用`BrowserRouter` 代替。
+
+为了兼容以前的history API，且支持在组件外部调用`navigate`，我在原来的history文件中使用导入了的新的router实例，将原来的history调用方法代理到router实例上，保持项目中调用的API不变。
+
+```jsx
+// @/utils/history.ts
+import routes from '@/routes';
+import type { To } from 'react-router-dom';
+import { createBrowserRouter } from 'react-router-dom';
+
+export const router = createBrowserRouter(routes);
+// 兼容旧的history API
+export const history = {
+  push: router.navigate,
+  go: router.navigate,
+  back: () => router.navigate(-1),
+  listen: router.subscribe,
+  replace: (to: To) => router.navigate(to, { replace: true }),
+  ...router,
+};
+
+export default history;
+```
+
+这导致了以下循环依赖：history→router→routes→component→store→history
+
+如果是全部改用新的API，需要对业务代码有很大的改造成本，且新的API只支持hook使用，在组件外部使用依然需要导入`router` 实例，仍然可能引入依赖循环的问题。
+
+### 使用异步导入
+
+在深度思考之后，还是决定最小化改动，在不修改业务代码的前提下解决问题。使用异步导入来打破依赖循环，修改`hitstory`文件如下:
+
+```jsx
+import type { To } from 'react-router-dom';
+import { createBrowserRouter } from 'react-router-dom';
+
+type Router = ReturnType<typeof createBrowserRouter>;
+
+async function loadRouter() {
+  const { router } = await import('@/router');
+  return router;
+}
+
+type History = {
+  push: Router['navigate'];
+  go: Router['navigate'];
+  back: () => ReturnType<Router['navigate']>;
+  listen: Router['subscribe'];
+  replace: (to: To) => Promise<void>;
+};
+
+// 兼容旧的history API
+export const history = new Proxy<History>({} as History, {
+  get(target, p: keyof History, receiver) {
+    if (!target[p]) {
+      return () => {
+        console.warn('Router instance is not initialized');
+      };
+    }
+    return target[p]
+  },
+  set(target, p: keyof History, newValue, receiver) {
+    target[p] = newValue;
+    return true
+  },
+});
+
+loadRouter().then((router) => {
+  history.push = router.navigate;
+  history.go = router.navigate;
+  history.back = () => router.navigate(-1);
+  history.listen = router.subscribe;
+  history.replace = (to: To) => router.navigate(to, { replace: true });
+});
+
+export default history;
+```
+
+这样业务代码中任可以使用以前的API，无需任何改造。
