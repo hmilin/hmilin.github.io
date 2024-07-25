@@ -1,0 +1,273 @@
+---
+title: 使用react-i18next进行国际化配置
+description: 在react的应用中如何进行国际化配置，并适配多种使用场景以及开发体验的提升
+public: true
+date: "2024-07-25 19:03:00"
+category: framework
+---
+
+# 使用react-i18next进行国际化配置
+
+本文记录了如何`react-i18next`的基础配置、跟typescript的结合使用、在组件内外的使用和如何通过自定义脚本来提高翻译文本输出。
+
+## 基础使用
+
+1. 安装 `i18next` 和 `react-i18next`
+2. 在`src`目录下创建`i18n.ts`文件，并创建`locales`目录来存放不同语言对应的翻译
+
+```typescript
+import { setValidateLanguage } from '@formily/core';
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+import en from './locales/en/translation.json';
+import zh from './locales/zh/translation.json';
+
+const defaultLg = localStorage.getItem('locale') || 'zh-CN';
+i18n.use(initReactI18next).init({
+  fallbackLng: defaultLg,
+  debug: true,
+  interpolation: {
+    escapeValue: false, // not needed for react as it escapes by default
+  },
+  resources: {
+    'en-US': {
+      translation: en,
+    },
+    'zh-CN': {
+      translation: zh,
+    },
+  },
+});
+
+export default i18n;
+```
+并在`App.tsx`中导入
+
+3. 定义语言切换组件，通过调用`i18n`实例下的`changeLanguage`方法来切换语言，并使用`localStorage`来持久化数据
+```typescript
+import { TranslationOutlined } from '@ant-design/icons';
+import { Dropdown } from 'antd';
+import { useTranslation } from 'react-i18next';
+
+const items = [
+  {
+    key: 'en-US',
+    label: 'English',
+  },
+  {
+    key: 'zh-CN',
+    label: '中文',
+  },
+];
+
+interface LanguageChangerProps {}
+
+const LanguageChanger: React.FC<LanguageChangerProps> = () => {
+  const { i18n } = useTranslation();
+
+  const handleChange = (key: string) => {
+    i18n.changeLanguage(key);
+    localStorage.setItem('locale', key);
+  };
+
+  return (
+    <Dropdown
+      menu={{
+        items,
+        selectedKeys: [i18n.language],
+        onClick: ({ key }) => handleChange(key),
+      }}
+    >
+      <div className="header-item">
+        <TranslationOutlined />
+      </div>
+    </Dropdown>
+  );
+};
+
+export default LanguageChanger;
+
+```
+
+4. 通过translation文件中对应的key来使用，考虑到随着业务的新增翻译配置会越来越多，提前将配置进行分组
+```json
+{
+  // 全局公共配置
+  "global": {
+     // 页面导航
+    "pages": {},
+    // 基础公共配置
+    "common": {
+      "confirmTitle": "确认"
+    },
+    // 模板
+    "templates": {
+      "remove_confirm": "确定删除{{target}} <strong>{{name}}</strong>？"
+    },
+    // 提示语
+    "messages": {
+      "remove_successful": "删除成功！",
+      "save_successful": "保存成功！"
+    }
+  },
+  //根据业务对象进行分类
+  "users": {},
+  "projects": {},
+}
+```
+
+## Typescript配置实现提示
+
+经过以上配置后，我们就可以通过上面配置的key来使用国际化文本，比如在组件中调用`useTranslation`API返回的t方法来获取文本
+
+```typescript
+ const { t } = useTranslation();
+ return t('global.common.hello')
+```
+
+`react-i18next`支持通过ts的类型配置来实现提示
+
+1. 在src/@types下目录下建立resources.ts，导入主语言的配置
+```typescript
+import translation from '../locales/zh/translation.json';
+
+const resources = {
+  translation,
+} as const;
+
+export default resources;
+```
+
+2. 在src/@types下目录下建立i18next.d.ts，并添加以下配置：
+```
+import resources from './resources';
+
+declare module 'i18next' {
+  interface CustomTypeOptions {
+    resources: typeof resources;
+  }
+}
+```
+再次调用t方法时，就能看见类型的提示了。
+
+## 在多种场景下的使用方式
+
+1. 在组件中使用
+
+```typescript
+const { t } = useTranslation();
+t('global.common.hello')
+```
+
+2. 在组件外使用
+
+在组件作用域外的文本，可以调用Translation组件来使用，为了方便调用可以封装以下组件
+
+```typescript
+import type { KeyPrefix } from 'i18next';
+import { Translation as TranslationBase } from 'react-i18next';
+
+type Keys = KeyPrefix<'translation'>;
+
+interface TranslationProps {
+  token: Keys;
+}
+
+const Translation: React.FC<TranslationProps> = ({ token }) => {
+  return <TranslationBase>{(t) => t(token as unknown as any)}</TranslationBase>;
+};
+
+export default Translation;
+
+```
+使用如下：
+```typescript
+const orderOptions = [
+  {
+    label: <Translation token="global.common.updateTime" />,
+    value: 'modify_time',
+  },
+  {
+    label: <Translation token="global.common.createTime" />,
+    value: 'create_time',
+  },
+];
+```
+
+3. 结合模板使用Tran组件
+
+```typescript
+<Trans i18nKey="global.template.remove_confirm">
+  {{ target: t('applications.title') }}
+  {{ name: card.k8sName }}
+</Trans>
+```
+
+## 结合`google翻译`实现自动化翻译脚本
+
+由于一些复杂的翻译需要用到翻译软件辅助，但翻译过后仍需人工调整，一些词性差异和专有名词翻译软件并不能完全准确翻译，因此最适合的自动化方法是编写一个脚本将未翻译的字段翻译并填写到对应文件中，再进行人工修正
+
+安装`@vitalets/google-translate-api`插件，通过插件来调用google翻译的API
+
+```javascript
+import { translate } from '@vitalets/google-translate-api';
+import fs from 'fs';
+import { HttpProxyAgent } from 'http-proxy-agent';
+import zhText from '../locales/zh/translation.json' assert  { type: "json" };
+import enText from '../locales/en/translation.json' assert  { type: "json" };
+import { get } from 'lodash-es';
+import { set } from 'lodash-es';
+import path from 'path';
+
+const enFilePath = path.resolve('./src/locales/en/translation.json');
+
+const args = process.argv.slice(2);
+const proxy = args[0]?.match(/(?<=proxy=).*/)[0] || 'http://127.0.0.1:7890';
+const timeoutMs = 5000;
+
+async function translateText(sourceText, to) {
+  const ac = new AbortController();
+  const timer = setTimeout(() => ac.abort(), timeoutMs);
+  const fetchOptions = {
+    agent: new HttpProxyAgent(proxy),
+    signal: ac.signal,
+  };
+  try {
+    const { text } = await translate(sourceText, { fetchOptions, to, });
+    return text
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function traverseTexts(translations, key = '') {
+  for (const k in translations) {
+    const value = translations[k]
+    const fullKey = `${key ? `${key}.` : ''}${k}`
+    if (typeof value === 'string') {
+      // 只翻译新增的配置
+      if (get(enText, fullKey) !== void 0) {
+        continue
+      }
+      console.log('translating:', value)
+      const translated = await translateText(value, 'en')
+      set(enText, fullKey, translated)
+    } else {
+      await traverseTexts(value, fullKey)
+    }
+  }
+}
+
+function saveEnTexts() {
+  const jsonContent = JSON.stringify(enText, null, 2);
+  fs.writeFileSync(enFilePath, jsonContent, 'utf8');
+  console.log('Translation completed and saved to locales/en/translation.json');
+}
+
+await traverseTexts(zhText)
+saveEnTexts()
+```
+
+在`package.json`中添加script`"auto-translate": "node ./src/locales/translate.js"`
+
+在批量新增中文文本之后，执行`npm run auto-translate`即可自动填补缺漏的英文配置，可通过`--proxy=`来指定本地代理地址。
