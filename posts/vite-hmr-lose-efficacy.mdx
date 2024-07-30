@@ -83,20 +83,14 @@ export default history;
 
 如果是全部改用新的API，需要对业务代码有很大的改造成本，且新的API只支持hook使用，在组件外部使用依然需要导入`router` 实例，仍然可能引入依赖循环的问题。
 
-### 使用异步导入
+### 打破依赖循环
 
-在深度思考之后，还是决定最小化改动，在不修改业务代码的前提下解决问题。使用异步导入来打破依赖循环，修改`hitstory`文件如下:
+在深度思考之后，还是决定最小化改动，在不修改业务代码的前提下解决问题。在`hitsory.ts`中维护一个router变量和`injectRouter方法`，在`router`被创建之后调用`injectRouter`方法，即可逆转hitsory文件对router文件的依赖。`hitstory`文件修改如下:
 
 ```jsx
-import type { To } from 'react-router-dom';
-import { createBrowserRouter } from 'react-router-dom';
+import type { To, createBrowserRouter } from 'react-router-dom';
 
 type Router = ReturnType<typeof createBrowserRouter>;
-
-async function loadRouter() {
-  const { router } = await import('@/router');
-  return router;
-}
 
 type History = {
   push: Router['navigate'];
@@ -106,6 +100,7 @@ type History = {
   replace: (to: To) => Promise<void>;
 };
 
+let router: Router;
 // 兼容旧的history API
 export const history = new Proxy<History>({} as History, {
   get(target, p: keyof History, receiver) {
@@ -114,21 +109,25 @@ export const history = new Proxy<History>({} as History, {
         console.warn('Router instance is not initialized');
       };
     }
-    return target[p]
+    return target[p];
   },
   set(target, p: keyof History, newValue, receiver) {
     target[p] = newValue;
-    return true
+    return true;
   },
 });
-
-loadRouter().then((router) => {
+const initHistory = () => {
   history.push = router.navigate;
   history.go = router.navigate;
   history.back = () => router.navigate(-1);
   history.listen = router.subscribe;
   history.replace = (to: To) => router.navigate(to, { replace: true });
-});
+};
+
+export function injectRouter(newRouter: Router) {
+  router = newRouter;
+  initHistory();
+}
 
 export default history;
 ```
