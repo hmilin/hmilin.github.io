@@ -10,6 +10,7 @@ import UserSvg from "../Icons/face.svg";
 import SearchSvg from "../Icons/search.svg";
 import MenuSvg from "../Icons/menu.svg";
 import CloseSvg from "../Icons/close.svg";
+import StrategySvg from "../Icons/strategy.svg";
 
 import styles from "./index.module.css";
 import { usePathname, useRouter } from "next/navigation";
@@ -35,6 +36,11 @@ const menus = [
     link: "/category/tool",
     title: "工具使用",
     icon: <ToolSvg />,
+  },
+  {
+    link: "/category/performance",
+    title: "性能相关",
+    icon: <StrategySvg />,
   },
   {
     link: "/about",

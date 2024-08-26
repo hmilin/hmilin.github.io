@@ -12,6 +12,7 @@ const categoryNames = {
   native: "原生基础",
   framework: "框架相关",
   tool: "工具使用",
+  performance: "性能提升",
 } as const;
 
 type Params = {

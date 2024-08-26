@@ -1,0 +1,192 @@
+---
+title: React中的预加载策略
+description: React路由框架的预加载策略对比，以及在使用react-router时如何进行预加载设置
+public: true
+date: "2024-08-26 10:13:00"
+category: performance
+---
+
+# React中的预加载策略
+
+在现代前端项目中，构建工具会根据文件间导入的关系和用户的自定义策略进行分包，并结合组件懒加载和动态导入等函数声明，让页面在到达指定路由下，再加载相应的文件。
+进行路由预加载设置主要有两个好处：
+1. 提升页面加载性能。用户首次进入页面时，只加载必要的文件，可提升首屏的加载速度，主要对LCP的时间有明显提升。
+2. 提升稳定性。当应用版本更新后，静态文件的hash值可能发生变化，原来的文件可能获取不到，当用户在应用版本更新前打开页面，当路由跳转时是不会重新获取静态文件地址列表，这时页面可能会因为找不到文件而无法继续使用，用户只能通过刷新页面来解决。
+
+## link标签的prefetch和preload模式
+
+在原生html文件中，link标签用于加载外部资源，理解link标签对资源加载时机的设计，可以帮助我们理解路由预加载策略的设计思路。在使用link标签来加载文件时，rel参数的`prefetch`和`preload`模式都是和懒加载相关的参数，他们的区别如下：
+
+prefetch: 用于预获取下一个页面需要的文件，请求的优先级一般为Lowest
+
+preload: 用于加载当前页面很快就需要的文件，在页面生命周期开始之前就会触发请求，当加载js文件时，请求优先级为High，加载css文件时优先级为Highest
+
+## React路由框架的预加载策略对比
+
+1. ReactRouter
+    
+  没有对预加载的实现，需要使用者自定义
+    
+2. Nextjs
+    
+  在Link组件上通过`prefetch`传参来定义是否开启预加载，设置为`true`时，当link组件渲染在可视范围内，开始预加载相关文件，这种预加载模式比较接近原生<link/>的prefetch模式。
+    
+3. TanStack Router
+    
+  1. 可全局设置默认预加载策略，也可基于Link个性化
+  2. 目前已提供了两种预加载策略：`intent`和`viewport` ，前者会在hover到`Link`组件时加载组件，后者跟Nextjs的方案相似，在`Link`组件进入视图中加载组件
+
+## 使用ReactRouter如何自定义预加载策略
+
+### 基本思路
+
+1. 扩展`react-router`的`Link`组件，增加preload参数，支持`'intent'`和`'viewport'`两种策略。
+2. 定义一个`lazyLoad`函数替换`React.lazy`，返回对象中增加`preload`方法，用于手动调用。
+3. 在声明route配置时声明Component参数为：`lazyLoad(() => import('@src/pages/xxx'))`。
+4. Link组件中根据传入的`to`拿到相应的`Component`之后即可调用步骤2声明的preload方法，并根据指定的策略来决定调用的时机。
+
+### 具体实现
+
+`Link`组件:
+
+```typescript
+import useForkRef from '@/hooks/useForkRef';
+import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
+import type { ComponentType } from 'react';
+import { forwardRef, useCallback, useRef } from 'react';
+import type { LinkProps as RouterLinkProps } from 'react-router-dom';
+import { Link as RouterLink, matchRoutes } from 'react-router-dom';
+import useRoutesData from '../RoutesProvider/useRoutesData';
+import type { LazyLoadResult } from '@/utils/lazy';
+
+interface LinkProps extends RouterLinkProps {
+  /** preload strategy */
+  preload?: 'intent' | 'viewport' | false;
+}
+
+/**
+ * 基于react-router-dom的Link组件实现了preload功能
+ */
+const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
+  { preload, onMouseEnter, ...props },
+  forwardedRef,
+) {
+  const preloadedComponent = useRef<ComponentType>();
+  const elementRef = useRef<HTMLAnchorElement | null>(null);
+  const mergedRef = useForkRef(elementRef, forwardedRef);
+
+  // 拿到所有routes配置
+  const routes = useRoutesData();
+
+  // preload component
+  const preloadComponent = useCallback(() => {
+    if (!preloadedComponent.current) {
+      const matches = matchRoutes(routes, props.to);
+      matches?.forEach((route) => {
+        const loader = (route.route.Component as LazyLoadResult)?.preload;
+        if (loader) {
+          loader().then((module) => {
+            preloadedComponent.current = module.default;
+          });
+        }
+      });
+    }
+  }, [props.to, routes]);
+
+  const handleMouseEnter: React.MouseEventHandler<HTMLAnchorElement> = useCallback(
+    (e) => {
+      if (preload === 'intent') {
+        preloadComponent();
+      }
+      onMouseEnter?.(e);
+    },
+    [preloadComponent, onMouseEnter, preload],
+  );
+
+  const preloadViewportIoCallback = useCallback(
+    (entry: IntersectionObserverEntry | undefined) => {
+      if (entry?.isIntersecting) {
+        preloadComponent();
+      }
+    },
+    [preloadComponent],
+  );
+
+  useIntersectionObserver<HTMLAnchorElement>(
+    elementRef,
+    preloadViewportIoCallback,
+    {},
+    { disabled: preload !== 'viewport' },
+  );
+
+  return <RouterLink ref={mergedRef} {...props} onMouseEnter={handleMouseEnter} />;
+});
+
+export default Link;
+```
+
+`lazyLoad`函数：
+```typescript
+import type { ComponentType, LazyExoticComponent } from 'react';
+import { lazy } from 'react';
+
+export type LazyLoadResult<T extends ComponentType<any> = ComponentType<any>> =
+  LazyExoticComponent<T> & {
+    preload: () => Promise<{ default: T }>;
+  };
+
+export function lazyLoad<T extends ComponentType<any>>(
+  load: () => Promise<{ default: T }>,
+): LazyLoadResult<T> {
+  let preloaded = false;
+  let loadedComponent: { default: T };
+  const loadComponent = async () => {
+    if (preloaded) return loadedComponent;
+    loadedComponent = await load().then((res) => {
+      preloaded = true;
+      return res;
+    });
+    return loadedComponent;
+  };
+  const preload = loadComponent;
+  const lazyComponent: any = lazy(loadComponent);
+  lazyComponent.preload = preload;
+
+  return lazyComponent as LazyLoadResult<T>;
+}
+```
+
+`routes`文件:
+```typescript
+import Loading from '@/components/Loading';
+import Layout from '@/components/layouts';
+import { lazyLoad } from '@/utils/lazy';
+import type { RouteObject } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
+
+const Home = lazyLoad(() => import('@/pages/Home'));
+const routes: RouteObject[] = [
+  {
+    path: '/',
+    element: <Layout />,
+    children: [
+      {
+        index: true,
+        element: <Navigate to="/home" />,
+      },
+      {
+        path: 'home',
+        Component: Home,
+      },
+    ],
+  },
+];
+
+export default routes;
+```
+
+具体代码实现可参考模板项目：[hmilin/react-vite-template](https://github.com/hmilin/react-vite-template)
+
+## 为什么插件`vite-plugin-preload`对加载性能提升无效
+
+在`vite+react`项目中解决预加载问题时，看到插件`vite-plugin-preload`，但是看了他的具体实现方式发现并不能解决我们的问题。原因是：使用`vite-plugin-preload`插件后，所有原先动态加载的模块都会使用`<link rel="modulepreload" href="xxx.js" />`加到入口html文件中，这意味着用户首次打开页面时，将在第一时间加载所有模块文件，且请求优先级为High。当项目比较庞大时，首屏加载时间将会变得很大。
