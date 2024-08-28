@@ -1,0 +1,65 @@
+---
+title: 利用Service Worker预缓存提高性能
+description: 本文介绍如何使用Service Worker对关键资源进行预缓存，从而提升网站加载速度
+public: false
+date: "2024-08-27 19:22:00"
+category: performance
+---
+
+# 利用Service Worker预缓存提高性能
+
+
+## Service Worker 特性
+
+>Service worker 本质上充当 Web 应用程序、浏览器与网络（可用时）之间的代理服务器。这个 API 旨在创建有效的离线体验，它会拦截网络请求并根据网络是否可用来采取适当的动作、更新来自服务器的资源。它还提供入口以推送通知和访问后台同步 API。
+
+## 生命周期
+
+- 下载：第一次访问页面后会下载service worker文件
+- 安装
+- 激活：关闭页面后，service worker会进入等待状态，重新打开页面后会激活
+
+详细生命周期以及新老service worker替代时机：
+![sw-lifecycle](/posts-img/sw-lifecycle.svg)
+
+### 使用限制
+
+Service Worker仅支持在开启HTTPS或localhost下使用
+
+### 使用场景
+
+- 后台数据同步
+- 响应来自其他源的资源请求
+- 集中接收计算成本高的数据更新，比如地理位置和陀螺仪信息，这样多个页面就可以利用同一组数据
+- 在客户端进行 CoffeeScript、LESS、CJS/AMD 等模块编译和依赖管理（用于开发目的）
+- 后台服务钩子
+- 自定义模板用于特定 URL 模式
+- 性能增强，比如预取用户可能需要的资源，比如相册中的后面数张图片
+
+## workbox precaching
+
+workbox项目是基于Service Worker能力进行封装的一组插件，用于构建渐进式应用。
+
+## 不同构建工具下的使用
+
+### Webpack
+
+在Webpack项目中，可直接使用google团队提供的`workbox-webpack-plugin`插件
+
+### Vite
+
+使用`vite-plugin-pwa`，
+
+## 什么文件需要预缓存
+
+为了不造成浪费以及影响用户体验，预缓存原则上应该只缓存关键文件:
+
+- 全局样式表。
+- 提供全局功能的 JavaScript 文件。
+- App Shell HTML
+
+
+## 相关文章
+
+- [precaching-dos-and-donts](https://developer.chrome.com/docs/workbox/precaching-dos-and-donts#maybe_dont_precache_static_html)
+- [App Shell](https://developer.chrome.com/blog/app-shell)
