@@ -11,6 +11,8 @@ import path from "path";
 import { postFilePaths, POSTS_PATH } from "../../utils/mdxUtils";
 import CodeBlock from "../../components/CodeBlock";
 import remarkGfm from "remark-gfm";
+import remarkMdxMindElixir from "utils/mind-plugin";
+import MindElixir from "components/MindElixir";
 
 interface PostsPageProps {
   source: any;
@@ -24,6 +26,7 @@ interface PostsPageProps {
 const components = {
   Head,
   pre: CodeBlock,
+  MindElixir,
 };
 
 const PostsPage: NextPage<PostsPageProps> = ({ source, frontMatter }) => {
@@ -68,7 +71,7 @@ export const getStaticProps = async ({ params }: { params: Params }) => {
   const mdxSource = await serialize(content, {
     // Optionally pass remark/rehype plugins
     mdxOptions: {
-      remarkPlugins: [remarkGfm],
+      remarkPlugins: [remarkGfm, remarkMdxMindElixir],
       rehypePlugins: [],
     },
     scope: data,
