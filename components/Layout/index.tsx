@@ -1,10 +1,7 @@
-import GlobalSearch from "components/GlobalSearch";
 import type { NextPage } from "next";
-import Head from "next/head";
-import Image from "next/image";
 import Header from "../Header";
 import styles from "./index.module.css";
-import { HTMLAttributes, PropsWithChildren, ReactNode } from "react";
+import type { HTMLAttributes, PropsWithChildren, ReactNode } from "react";
 import classNames from "classnames";
 
 interface LayoutProps {

@@ -1,4 +1,4 @@
-import { NextPage } from "next";
+import type { NextPage } from "next";
 import Link from "next/link";
 import classNames from "classnames";
 
@@ -13,7 +13,7 @@ import CloseSvg from "../Icons/close.svg";
 import StrategySvg from "../Icons/strategy.svg";
 
 import styles from "./index.module.css";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 const menus = [

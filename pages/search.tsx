@@ -1,5 +1,5 @@
 import GlobalSearch from "components/GlobalSearch";
-import { NextPage } from "next";
+import type { NextPage } from "next";
 import styles from "../styles/search.module.css";
 import Layout from "components/Layout";
 

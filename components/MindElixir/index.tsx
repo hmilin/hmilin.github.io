@@ -1,4 +1,4 @@
-import { MindElixirData, MindElixirInstance } from "mind-elixir";
+import type { MindElixirData, MindElixirInstance } from "mind-elixir";
 import { useLayoutEffect, useRef } from "react";
 
 export interface MindElixirProps {

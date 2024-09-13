@@ -1,8 +1,6 @@
 import Giscus from "@giscus/react";
 
-interface CommentProps {}
-
-const Comment: React.FC<CommentProps> = () => {
+const Comment: React.FC = () => {
   return (
     <Giscus
       id="comments"

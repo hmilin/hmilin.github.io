@@ -1,10 +1,9 @@
 import algoliasearch from "algoliasearch/lite";
+import type { HitsProps } from "react-instantsearch-hooks-web";
 import {
   InstantSearch,
   SearchBox,
-  Hits,
   useHits,
-  HitsProps,
 } from "react-instantsearch-hooks-web";
 import {
   ALGOLIA_APP_ID,

@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
 import Layout from "../components/Layout";
-import { AboutData } from "./api/about";
+import type { AboutData } from "./api/about";
 import classNames from "classnames";
 
 import styles from "../styles/about.module.css";
