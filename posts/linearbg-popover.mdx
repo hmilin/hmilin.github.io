@@ -1,0 +1,43 @@
+---
+title: 实现渐变背景的气泡框
+description: 使用css实现渐变色背景的气泡框
+public: false
+date: "2024-07-19 12:01:00"
+category: native
+---
+
+# 实现渐变背景的气泡框
+
+传统的气泡框一般使用一个圆角div+三角形来模拟，在背景色为普通颜色时，分别设置背景色即可理想的效果。然而将背景色改为渐变色时，分别给两部分元素设置背景色，无法设置出连续的颜色，所以原先的实现方式不适用。
+
+
+## 初始方案
+
+### 实现逻辑
+
+1. 画一个渐变色背景的矩形
+2. 使用和背景色一致的颜色遮罩盖住无需展示的部分，模拟三角形和圆角
+  1. 远离箭头的矩形正常设置border-radius
+  2. 靠近箭头的矩形圆角使用两个遮罩来模拟，使用clip-path的path函数实现
+  3. 使用clip-path的polygon（多边形）函数截取三角形的反转部分，遮住非三角形的部分。
+
+如下图：
+
+### 效果
+
+<SimpleLinearPopover parrentBackground="#FFF9ED">hello!</SimpleLinearPopover>
+
+### 局限
+
+只能适用于背景色为纯色的场景，对背景为图片或带透明叠加效果的场景不适用
+
+## 改良方案
+
+能不能仅用一个div+clip-path，将气泡框描绘出来?
+
+path函数中只能声明固定坐标点而不能用百分比，气泡框的宽高是根据内容自适应，因此无法确定具体坐标点
+
+
+## 参考资料
+
+[path椭圆曲线](https://developer.mozilla.org/zh-CN/docs/Web/SVG/Attribute/d#%E6%A4%AD%E5%9C%86%E6%9B%B2%E7%BA%BF)

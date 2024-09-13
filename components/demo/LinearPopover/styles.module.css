@@ -1,0 +1,86 @@
+.simple-popover-container {
+  position: relative;
+  width: fit-content;
+  max-width: 100%;
+  padding: 12px 24px 12px 16px;
+  word-break: break-all;
+  color: #fff;
+  background: linear-gradient(137deg, #efe2b7 0%, #a4d1b1 90%);
+  border-radius: 12px;
+  white-space: pre-wrap;
+}
+
+.simple-popover-container .simple-popover-container-direction-left {
+  transform: rotateY(180deg);
+}
+.simple-popover-container .simple-popover-container-direction-right {
+  transform: unset;
+}
+
+.simple-popover-content {
+  overflow: auto;
+}
+
+.simple-popover-container
+  .simple-popover-container-direction-left
+  .simple-popover-content {
+  transform: rotateY(180deg);
+}
+
+.simple-popover-container:before {
+  position: absolute;
+  top: -2px;
+  right: 6px;
+  content: "";
+  width: 14px;
+  height: 14px;
+  background: var(--parent-background-color);
+  clip-path: path("M 0 0 L 0 2 A 12 12 0 0 1 12 14 L 14 14 L 14 0 0 0 Z");
+}
+
+.simple-popover-container:after {
+  position: absolute;
+  bottom: -2px;
+  right: 6px;
+  content: "";
+  width: 14px;
+  height: 14px;
+  background: var(--parent-background-color);
+  clip-path: path("M 14 0 L 12 0 A 12 12 0 0 1 0 12 L 0 14 L 14 14 14 0 Z");
+}
+
+.simple-popover-arrow:after {
+  position: absolute;
+  top: 0;
+  right: -2px;
+  content: "";
+  width: 10px;
+  height: 100%;
+  background: var(--parent-background-color);
+  clip-path: polygon(
+    100% 0,
+    0 0,
+    0 12px,
+    8px 21px,
+    0 30px,
+    0 100%,
+    100% 100%,
+    100% 21px
+  );
+}
+
+.popover-container {
+  position: relative;
+  width: fit-content;
+  max-width: 100%;
+  padding: 12px 24px 12px 16px;
+  word-break: break-all;
+  color: #fff;
+  background: linear-gradient(137deg, #efe2b7 0%, #a4d1b1 90%);
+  border-radius: 12px;
+  white-space: pre-wrap;
+}
+
+.popover-container.popover-container-direction-left {
+  clip-path: path("M 0 12 A 12 12 0 0 1 12 0 L 0 14 L 14 14 14 0 Z");
+}

@@ -2,7 +2,6 @@ import fs from "fs";
 import matter from "gray-matter";
 import type { NextPage } from "next";
 import Head from "next/head";
-import Link from "next/link";
 import Layout from "../../components/Layout";
 import Comment from "../../components/Comment";
 import { MDXRemote } from "next-mdx-remote";
@@ -13,6 +12,8 @@ import CodeBlock from "../../components/CodeBlock";
 import remarkGfm from "remark-gfm";
 import remarkMdxMindElixir from "utils/mind-plugin";
 import MindElixir from "components/MindElixir";
+import LinearPopover from "components/demo/LinearPopover";
+import SimpleLinearPopover from "components/demo/LinearPopover/SimpleLinearPopover";
 
 interface PostsPageProps {
   source: any;
@@ -27,6 +28,8 @@ const components = {
   Head,
   pre: CodeBlock,
   MindElixir,
+  LinearPopover,
+  SimpleLinearPopover,
 };
 
 const PostsPage: NextPage<PostsPageProps> = ({ source, frontMatter }) => {
