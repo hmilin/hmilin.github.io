@@ -14,6 +14,7 @@ import remarkMdxMindElixir from "utils/mind-plugin";
 import MindElixir from "components/MindElixir";
 import LinearPopover from "components/demo/LinearPopover";
 import SimpleLinearPopover from "components/demo/LinearPopover/SimpleLinearPopover";
+import createAnchorTitle from "components/AnchorTitle/CreateAnchorTitle";
 
 interface PostsPageProps {
   source: any;
@@ -24,6 +25,13 @@ interface PostsPageProps {
   };
 }
 
+const titleComponents = Array.from({ length: 5 }).reduce<
+  Record<string, React.FC>
+>((a, _, i) => {
+  a[`h${i + 1}`] = createAnchorTitle(i + 1);
+  return a;
+}, {});
+
 const components = {
   Head,
   pre: CodeBlock,
@@ -31,6 +39,7 @@ const components = {
   LinearPopover,
   SimpleLinearPopover,
   LinearPopover,
+  ...titleComponents,
 };
 
 const PostsPage: NextPage<PostsPageProps> = ({ source, frontMatter }) => {
