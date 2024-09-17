@@ -30,6 +30,7 @@ const components = {
   MindElixir,
   LinearPopover,
   SimpleLinearPopover,
+  LinearPopover,
 };
 
 const PostsPage: NextPage<PostsPageProps> = ({ source, frontMatter }) => {

@@ -197,6 +197,11 @@ module.exports = {
           borderColor: theme("colors.neutral.80"),
           padding: 8,
         },
+        "ol, ul, menu": {
+          listStyle: "normal",
+          margin: 8,
+          padding: 8,
+        },
       });
     }),
   ],
