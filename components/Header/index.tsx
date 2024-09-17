@@ -39,7 +39,7 @@ const menus = [
   },
   {
     link: "/category/performance",
-    title: "性能相关",
+    title: "性能提升",
     icon: <StrategySvg />,
   },
   {
