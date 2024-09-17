@@ -1,0 +1,20 @@
+.skeleton-container {
+  width: 100px;
+
+  .skeleton {
+    height: 12px;
+    background: theme(colors.neutral.98);
+    border-radius: 8px;
+    
+    &:not(:last-child) {
+      margin-bottom: 8px;
+    }
+
+    &[data-level="3"] {
+      margin-left: 4px;
+    }
+    &[data-level="4"] {
+      margin-left: 8px;
+    }
+  }
+}
