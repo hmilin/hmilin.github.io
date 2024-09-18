@@ -32,7 +32,7 @@ interface PostsPageProps {
 const titleComponents = Array.from({ length: 5 }).reduce<
   Record<string, React.FC>
 >((a, _, i) => {
-  a[`h${i + 1}`] = createAnchorTitle(i + 1);
+  a[`h${i + 1}`] = createAnchorTitle((i + 1) as 1 | 2 | 3 | 4 | 5);
   return a;
 }, {});
 
@@ -42,7 +42,6 @@ const components = {
   MindElixir,
   LinearPopover,
   SimpleLinearPopover,
-  LinearPopover,
   ...titleComponents,
 };
 
@@ -96,7 +95,7 @@ export const getStaticProps = async ({ params }: { params: Params }) => {
     mdxOptions: {
       remarkPlugins: [
         remarkGfm,
-        remarkMdxMindElixir,
+        remarkMdxMindElixir as any,
         [extractCatalogues, headings],
       ],
       rehypePlugins: [],

@@ -24,7 +24,7 @@ const LinearPopover: React.FC<PropsWithChildren<LinearPopoverProps>> = ({
           if (entry.contentRect) {
             const { width, height } = entry.target.getBoundingClientRect();
             const path = genPopoverPath(width, height);
-            containerRef.current!.style["clip-path"] = `path('${path}')`;
+            containerRef.current!.style.clipPath = `path('${path}')`;
           }
         }
       });

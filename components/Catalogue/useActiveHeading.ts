@@ -31,7 +31,7 @@ export default function useActiveHeading(headings: Headings) {
     const onScrollChange = () => {
       const { top } = document.documentElement.getBoundingClientRect();
       const offsetHeight = document.documentElement.offsetHeight;
-      let target: string;
+      let target: string | null = null;
       for (const [index, point] of Object.entries(points.current)) {
         if (point.top + top > 0) {
           target = point.id;

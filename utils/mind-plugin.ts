@@ -10,7 +10,7 @@ import { valueToEstree } from "estree-util-value-to-estree";
 // width: 1000
 // height: 500
 // root: rootName
-// nodes: 
+// nodes:
 //   - AAA:
 //     - aaa
 //     - bbb:
@@ -73,26 +73,28 @@ const createMindElixirJSXTree = (options: MindElixirProps) => {
   return {
     type: "mdxJsxFlowElement",
     name: "MindElixir",
-    attributes: Object.keys(options).map((propKey) => ({
-      name: propKey,
-      type: "mdxJsxAttribute",
-      value: {
-        type: "mdxJsxAttributeValueExpression",
-        value: JSON.stringify(options[propKey]),
-        data: {
-          estree: {
-            type: "Program",
-            sourceType: "module",
-            body: [
-              {
-                type: "ExpressionStatement",
-                expression: valueToEstree(options[propKey]),
-              },
-            ],
+    attributes: (Object.keys(options) as (keyof MindElixirProps)[]).map(
+      (propKey) => ({
+        name: propKey,
+        type: "mdxJsxAttribute",
+        value: {
+          type: "mdxJsxAttributeValueExpression",
+          value: JSON.stringify(options[propKey]),
+          data: {
+            estree: {
+              type: "Program",
+              sourceType: "module",
+              body: [
+                {
+                  type: "ExpressionStatement",
+                  expression: valueToEstree(options[propKey]),
+                },
+              ],
+            },
           },
         },
-      },
-    })),
+      })
+    ),
   };
 };
 
@@ -104,8 +106,8 @@ const createMindElixirJSXTree = (options: MindElixirProps) => {
  * @return {function}
  */
 const visitCodeBlock: Transformer = (ast, vFile, options) => {
-  return visit(ast, "code", (node, index, parent) => {
-    const { lang, value, meta, position } = node;
+  return visit(ast, "code", (node, index, parent: any) => {
+    const { lang, value, position } = node;
 
     // If this codeblock is not chartjs, bail.
     if (lang !== "mind") {
@@ -121,7 +123,7 @@ const visitCodeBlock: Transformer = (ast, vFile, options) => {
       // 创建插入jsx代码的ast节点
       const newNode = createMindElixirJSXTree({ nodes: fullNodes, ...oth });
       parent?.children?.splice(index, 1, newNode);
-    } catch (error) {
+    } catch (error: any) {
       vFile.message(error, position, PLUGIN_NAME);
     }
     return node;
@@ -136,7 +138,7 @@ const remarkMdxMindElixir: Pluggable = (options = {}) => {
     visitCodeBlock(ast, vFile, options);
 
     if (typeof next === "function") {
-      return next(null, ast, vFile);
+      return next(undefined, ast, vFile);
     }
 
     return ast;

@@ -30,7 +30,7 @@ const MindElixir: React.FC<MindElixirProps> = ({
       });
       instance.init({ nodeData: nodes });
       requestAnimationFrame(() => {
-        const root = instance.map.querySelector("me-root");
+        const root = instance.map.querySelector("me-root") as HTMLElement;
         instance.container.scrollTo(
           10000 - (root?.offsetWidth || 0) / 2,
           10000 - instance.container.offsetHeight / 2
