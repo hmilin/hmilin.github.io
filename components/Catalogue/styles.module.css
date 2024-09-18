@@ -46,7 +46,7 @@
     padding-left: 0;
 
     &:not(:last-child) {
-      margin-bottom: 4px;
+      margin-bottom: 8px;
     }
     &[data-level="3"] {
       margin-left: 8px;
@@ -58,7 +58,11 @@
     }
 
     a {
-      color: theme(colors.neutral.60);
+      color: theme(colors.neutral.70);
+    }
+
+    &.active a {
+      color: theme(colors.secondary.50);
     }
   }
 }

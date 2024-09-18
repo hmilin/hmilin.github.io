@@ -2,7 +2,7 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 48px;
-  margin: 48px 40px;
+  margin: 24px 40px;
 }
 
 @media (max-width: 1500px) {
@@ -23,5 +23,6 @@
   .postContainer {
     width: auto;
     grid-template-columns: repeat(1, 1fr);
+    margin: 24px 24px;
   }
 }
