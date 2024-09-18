@@ -1,5 +1,6 @@
 import type { MindElixirData, MindElixirInstance } from "mind-elixir";
-import { useLayoutEffect, useRef } from "react";
+import { useRef } from "react";
+import useEnhancedEffect from "utils/useEnhancedEffect";
 
 export interface MindElixirProps {
   /** @default 'map' */
@@ -16,7 +17,7 @@ const MindElixir: React.FC<MindElixirProps> = ({
   height = 400,
 }) => {
   const me = useRef<MindElixirInstance>();
-  useLayoutEffect(() => {
+  useEnhancedEffect(() => {
     import("mind-elixir").then(({ default: MindElixirBase }) => {
       const instance = new MindElixirBase({
         el: `#${id}`,

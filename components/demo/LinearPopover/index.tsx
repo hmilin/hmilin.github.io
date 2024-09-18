@@ -1,7 +1,9 @@
 import classNames from "classnames";
-import { PropsWithChildren, useLayoutEffect, useRef, useState } from "react";
+import type { PropsWithChildren } from "react";
+import { useRef } from "react";
 
 import styles from "./styles.module.css";
+import useEnhancedEffect from "utils/useEnhancedEffect";
 
 type ArrowDirection = "left" | "right";
 
@@ -15,7 +17,7 @@ const LinearPopover: React.FC<PropsWithChildren<LinearPopoverProps>> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useLayoutEffect(() => {
+  useEnhancedEffect(() => {
     if (containerRef.current) {
       const resizeObserver = new ResizeObserver((entries) => {
         for (const entry of entries) {

@@ -15,6 +15,9 @@ import MindElixir from "components/MindElixir";
 import LinearPopover from "components/demo/LinearPopover";
 import SimpleLinearPopover from "components/demo/LinearPopover/SimpleLinearPopover";
 import createAnchorTitle from "components/AnchorTitle/CreateAnchorTitle";
+import extractCatalogues from "utils/extractCatalogues";
+import type { Headings } from "components/Catalogue";
+import Catalogues from "components/Catalogue";
 
 interface PostsPageProps {
   source: any;
@@ -23,6 +26,7 @@ interface PostsPageProps {
     description: string;
     date: string;
   };
+  headings: Headings;
 }
 
 const titleComponents = Array.from({ length: 5 }).reduce<
@@ -42,7 +46,11 @@ const components = {
   ...titleComponents,
 };
 
-const PostsPage: NextPage<PostsPageProps> = ({ source, frontMatter }) => {
+const PostsPage: NextPage<PostsPageProps> = ({
+  source,
+  frontMatter,
+  headings,
+}) => {
   return (
     <Layout
       cover={
@@ -55,6 +63,7 @@ const PostsPage: NextPage<PostsPageProps> = ({ source, frontMatter }) => {
     >
       <div className="content-container">
         <MDXRemote {...source} components={components} />
+        <Catalogues headings={headings} />
       </div>
       <div className="content-container">
         <Comment />
@@ -81,10 +90,15 @@ export const getStaticProps = async ({ params }: { params: Params }) => {
 
   const { content, data } = matter(source);
 
+  const headings: Headings[] = [];
   const mdxSource = await serialize(content, {
     // Optionally pass remark/rehype plugins
     mdxOptions: {
-      remarkPlugins: [remarkGfm, remarkMdxMindElixir],
+      remarkPlugins: [
+        remarkGfm,
+        remarkMdxMindElixir,
+        [extractCatalogues, headings],
+      ],
       rehypePlugins: [],
     },
     scope: data,
@@ -94,6 +108,7 @@ export const getStaticProps = async ({ params }: { params: Params }) => {
     props: {
       source: mdxSource,
       frontMatter: data,
+      headings,
     },
   };
 };
