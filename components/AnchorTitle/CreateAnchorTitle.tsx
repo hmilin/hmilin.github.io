@@ -1,5 +1,7 @@
+import type { PropsWithChildren } from "react";
+
 const createAnchorTitle = (level: number) => {
-  const AnchorTitle: React.FC = ({ children, ...props }) => {
+  const AnchorTitle: React.FC<PropsWithChildren> = ({ children, ...props }) => {
     const Component = `h${level}`;
     return (
       <Component id={children} {...props}>
