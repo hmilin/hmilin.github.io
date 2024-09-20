@@ -2,6 +2,13 @@
   "name": "blog-next",
   "version": "0.1.0",
   "private": true,
+  "browserslist": [
+    "Chrome >=88",
+    "Firefox >=78",
+    "Safari >=14.1",
+    "Edge >=88",
+    "iOS >=16"
+  ],
   "scripts": {
     "dev": "next dev",
     "dev:watch": "next-remote-watch ./posts",
@@ -37,6 +44,7 @@
     "@types/react": "18.3.1",
     "@types/react-syntax-highlighter": "^13.5.2",
     "autoprefixer": "^10.4.4",
+    "doiuse": "^6.0.3",
     "eslint": "8.48.0",
     "eslint-config-next": "14.2.3",
     "postcss": "^8.4.12",
