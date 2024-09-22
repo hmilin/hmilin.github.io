@@ -36,16 +36,19 @@
   padding: 0 12px;
   font-size: 32px;
   background-color: theme(colors.neutral.100);
-  > div {
-    width: fit-content;
+  > .text {
     max-width: 100%;
     height: fit-content;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    background: linear-gradient(137deg, #efe2b7 0%, #a4d1b1 90%);
-    background-clip: text;
-    color: transparent;
+    /* webkit内核中渐变色背景下无法显示省略号 */
+    color: rgb(164, 209, 177, 0.9);
+    .text-bg {
+      background: linear-gradient(137deg, #efe2b7 0%, #a4d1b1 90%);
+      background-clip: text;
+      color: transparent;
+    }
   }
 }
 

@@ -22,7 +22,9 @@ const PostCard: React.FC<PostCardProps> = ({
           <Image width={232} height={168} src={cover} alt="cover" />
         ) : (
           <div className={styles.cover}>
-            <div>{title}</div>
+            <div className={styles.text}>
+              <span className={styles["text-bg"]}>{title}</span>
+            </div>
           </div>
         )}
       </div>
