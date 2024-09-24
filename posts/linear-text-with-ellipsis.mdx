@@ -1,0 +1,137 @@
+---
+title: 渐变文字和文本省略兼容性问题
+description: 解决CSS渐变文字和文本省略共同使用时，在IOS和Firefox下的兼容问题。
+date: "2024-09-24 12:00:00"
+public: true
+---
+
+# 渐变文字和文本省略兼容性问题
+
+CSS中通常使用`background`的`linear-gradient`函数和`background-clip:text`来实现渐变色文字，但是当在同一个元素上同时设置`text-overflow:ellipsis`时，在IOS Safari和Firefox下都无法显示出省略号。
+
+## 常规实现
+
+使用渐变色文字和文本省略叠加，在chrome上效果符合预期，但是在IOS下所有浏览器（webkit内核）和Firefox下，都不能正常显示省略号。推测原因是浏览器处理`background-clip：text`时，没将`...`计入计算。
+
+```css
+.text1 {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: linear-gradient(137deg, #efe2b7 0%, #a4d1b1 90%);
+  background-clip: text;
+  color: transparent;
+}
+```
+
+在chrome中效果如下：
+
+![in chrome](/linear-text-compact/chrome-1.png)
+
+在Firefox和IOS Safari中，`...`都没显示出来；
+
+![in FF](/linear-text-compact/ff-1.png)
+
+## 兼容IOS
+
+使用双层盒子，第一层处理文本省略，第二层实现渐变文本。在第一层声明`color`为渐变文本最后一段的颜色，`...`即显示为该色，看起来也能达成渐变效果。
+
+```css 
+.text2 {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #a4d1b1;
+}
+.text2 > span {
+  background: linear-gradient(137deg, #efe2b7 0%, #a4d1b1 90%);
+  background-clip: text;
+  color: transparent;
+}
+```
+
+在IOS Safari效果如下：
+
+![in ios](/linear-text-compact/ios-2.jpg)
+
+但是在Firefox下仍热显示异常
+
+![in FF](/linear-text-compact/ff-2.png)
+
+处了FF兼容不了之外，这个方案中由于渐变色作用在全部文本上，当文本超出较多时，后半截被截取较多，展示出来的文本和`...`在颜色变化上并不连续，效果并不佳。
+
+## 使用mask-image
+
+也能一定程度上实现渐变色，由于mask-image是使用遮罩加颜色的叠加效果来呈现，颜色的调节上没有使用`background`灵活，并且需要注意兼容性问题。
+
+```css
+.text3 {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #a4d1b1;
+  mask-image: linear-gradient(137deg, transparent -20%, #a4d1b1 90%);
+}
+```
+
+## 最终方案
+
+使用两层文本显示，上层展示渐变色文本，下层展示正常颜色，中间有一层盖住非`...`的文本内容（防止带透明度的颜色叠加），视觉上能看到的内容即为：渐变色文本+正常颜色展示的`...`。
+
+```html
+<div
+  class="text4"
+  data-text="longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglongtext"
+>
+  longlonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglonglongtext
+</div>
+```
+
+```css
+.text4 {
+  position: relative;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #a4d1b1;
+}
+.text4::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: calc(100% - 20px);
+  background-color: #fff;
+  content: "";
+}
+.text4::after {
+  content: attr(data-text);
+  display: block;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: linear-gradient(137deg, #efe2b7 0%, #a4d1b1 90%);
+  background-clip: text;
+  color: transparent;
+}
+```
+
+在chrome、Firefox和IOS Safari中均展示一致的效果：
+
+![in chrome](/linear-text-compact/chrome-4.png)
+
+
+![in FF](/linear-text-compact/ff-4.png)
+
+
+![in IOS](/linear-text-compact/ios-4.jpg)
+
+## 测试文件
+
+[demo](/linear-text-compact/test-linear-text.html)
