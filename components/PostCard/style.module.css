@@ -50,7 +50,7 @@
       bottom: 0;
       left: 0;
       width: calc(100% - 60px);
-      background-color: theme(colors.neutral.99);
+      background-color: theme(colors.neutral.100);
       content: "";
     }
     &::after {
